@@ -9,7 +9,7 @@
         body { margin: 0; background: #1a252f; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Segoe UI', sans-serif; overflow: hidden; touch-action: none; }
         
         #game-container { position: relative; background: #f0f4f8; border: 6px solid white; border-radius: 20px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); width: 95vw; max-width: 800px; height: 80vh; max-height: 450px; overflow: hidden; display: flex; flex-direction: column; }
-        canvas { display: block; background: #f0f4f8; width: 100%; height: auto; margin-top: auto; }
+        canvas { display: block; background: #f0f4f8; width: 100%; height: auto; margin-top: auto; outline: none; }
         
         #phase-banner {
             position: absolute; top: 85px; left: 50%; transform: translateX(-50%);
@@ -69,7 +69,7 @@
         <button class="btn-main" onclick="location.reload()">VER RANKING / REPETIR</button>
     </div>
 
-    <canvas id="game" width="800" height="300"></canvas>
+    <canvas id="game" width="800" height="300" tabindex="0"></canvas>
 </div>
 
 <script>
@@ -104,7 +104,6 @@
             if(this.y > 220) { this.y = 220; this.vy = 0; }
             if(speed > 9 && frame % 3 === 0) ghosts.push({x: this.x, y: this.y, alpha: 0.4});
             
-            // Aura Dourada a partir de 2500 pontos
             if(score >= 2500) {
                 auraParticles.push({ x: this.x + Math.random() * 40, y: this.y + Math.random() * 60, vy: -Math.random() * 2, life: 1 });
             }
@@ -117,44 +116,32 @@
             });
 
             auraParticles.forEach((p, i) => {
-                ctx.fillStyle = `rgba(241, 196, 15, ${p.life})`; // Dourado
+                ctx.fillStyle = `rgba(241, 196, 15, ${p.life})`;
                 ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, 7); ctx.fill();
                 p.y += p.vy; p.life -= 0.05; if(p.life <= 0) auraParticles.splice(i, 1);
             });
 
             ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 4; ctx.lineCap = "round";
-
-            // Corpo Base
             ctx.beginPath(); ctx.arc(this.x+15, this.y+10, 9, 0, 7); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(this.x+15, this.y+19); ctx.lineTo(this.x+15, this.y+45); ctx.stroke();
             let leg = Math.sin(frame * 0.25) * 15;
             ctx.beginPath(); ctx.moveTo(this.x+15, this.y+45); ctx.lineTo(this.x+15+leg, this.y+60); ctx.stroke(); 
             ctx.beginPath(); ctx.moveTo(this.x+15, this.y+45); ctx.lineTo(this.x+15-leg, this.y+60); ctx.stroke(); 
 
-            // --- EVOLUÇÕES POR PONTUAÇÃO ---
-
-            if(score >= 500) { // 1º ÓCULOS
-                ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.arc(this.x+10, this.y+10, 4, 0, 7); ctx.stroke();
+            if(score >= 500) { 
+                ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(this.x+10, this.y+10, 4, 0, 7); ctx.stroke();
                 ctx.beginPath(); ctx.arc(this.x+20, this.y+10, 4, 0, 7); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(this.x+14, this.y+10); ctx.lineTo(this.x+16, this.y+10); ctx.stroke();
-                ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.moveTo(this.x+14, this.y+10); ctx.lineTo(this.x+16, this.y+10); ctx.stroke(); ctx.lineWidth = 4;
             }
-
-            if(score >= 1000) { // 2º CAPA
-                ctx.fillStyle = "#e74c3c"; ctx.beginPath(); 
-                ctx.moveTo(this.x+10, this.y+20);
-                ctx.lineTo(this.x-15, this.y+55+Math.sin(frame*0.2)*8);
-                ctx.lineTo(this.x+10, this.y+45); ctx.fill();
+            if(score >= 1000) { 
+                ctx.fillStyle = "#e74c3c"; ctx.beginPath(); ctx.moveTo(this.x+10, this.y+20);
+                ctx.lineTo(this.x-15, this.y+55+Math.sin(frame*0.2)*8); ctx.lineTo(this.x+10, this.y+45); ctx.fill();
             }
-
-            if(score >= 1500) { // 3º CAPELO
+            if(score >= 1500) { 
                 ctx.fillStyle = "#2c3e50"; ctx.fillRect(this.x+5, this.y-4, 20, 5); 
-                ctx.beginPath(); ctx.moveTo(this.x-3, this.y-4); ctx.lineTo(this.x+15, this.y-14);
-                ctx.lineTo(this.x+33, this.y-4); ctx.lineTo(this.x+15, this.y+6); ctx.fill();
+                ctx.beginPath(); ctx.moveTo(this.x-3, this.y-4); ctx.lineTo(this.x+15, this.y-14); ctx.lineTo(this.x+33, this.y-4); ctx.lineTo(this.x+15, this.y+6); ctx.fill();
             }
-
-            if(score >= 2000) { // 4º WOLVERINE
+            if(score >= 2000) { 
                 ctx.fillStyle = "#2c3e50";
                 ctx.beginPath(); ctx.moveTo(this.x + 5, this.y + 5); ctx.lineTo(this.x - 5, this.y - 10); ctx.lineTo(this.x + 10, this.y); ctx.fill();
                 ctx.beginPath(); ctx.moveTo(this.x + 25, this.y + 5); ctx.lineTo(this.x + 35, this.y - 10); ctx.lineTo(this.x + 20, this.y); ctx.fill();
@@ -165,10 +152,8 @@
                 }
                 ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 4;
             }
-
-            if(score >= 3000) { // 5º MEDALHA
-                ctx.fillStyle = "#f1c40f"; 
-                ctx.beginPath(); ctx.arc(this.x+15, this.y+25, 6, 0, 7); ctx.fill();
+            if(score >= 3000) { 
+                ctx.fillStyle = "#f1c40f"; ctx.beginPath(); ctx.arc(this.x+15, this.y+25, 6, 0, 7); ctx.fill();
                 ctx.strokeStyle = "#e67e22"; ctx.lineWidth = 2;
                 ctx.beginPath(); ctx.moveTo(this.x+10, this.y+19); ctx.lineTo(this.x+15, this.y+25); ctx.lineTo(this.x+20, this.y+19); ctx.stroke();
             }
@@ -203,7 +188,9 @@
         document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); 
         document.getElementById('hud').classList.remove('hidden'); 
         document.getElementById('phase-banner').classList.remove('hidden');
-        running = true; loop(); 
+        running = true; 
+        canvas.focus();
+        loop(); 
     }
 
     function loop() {
@@ -216,7 +203,6 @@
             parallaxX -= speed * 0.35; if(parallaxX < -800) parallaxX = 850;
             ctx.fillStyle = "rgba(44, 62, 80, 0.05)"; ctx.font = "900 80px Arial"; ctx.textAlign = "center";
             ctx.fillText("PROF. REINALDONR", parallaxX + 400, 80);
-
             ctx.fillStyle = "rgba(44, 62, 80, 0.45)"; ctx.font = "bold 15px Arial";
             ctx.fillText("DESAFIO GEOMÉTRICO MASTER - PROF. REINALDO", 400, 295);
             ctx.textAlign = "left";
@@ -254,8 +240,11 @@
         }
         requestAnimationFrame(loop);
     }
-    window.onkeydown = (e) => { if(["Space", "ArrowUp"].includes(e.code)) { e.preventDefault(); player.jump(); } if(e.code === "KeyP") togglePause(); };
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(running && !paused) player.jump(); }, {passive: false});
+
+    function handleAction(e) { if(e) e.preventDefault(); if(running && !paused) player.jump(); }
+    window.onkeydown = (e) => { if(["Space", "ArrowUp"].includes(e.code)) handleAction(e); if(e.code === "KeyP") togglePause(); };
+    canvas.addEventListener('touchstart', handleAction, {passive: false});
+    canvas.addEventListener('mousedown', handleAction);
 </script>
 </body>
 </html>
