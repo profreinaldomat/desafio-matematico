@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Desafio Geométrico Master - Prof. ReinaldoNR</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --danger: #e74c3c; }
+        body { margin: 0; background: #1a252f; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        #game-container { position: relative; background: #f0f4f8; border: 6px solid white; border-radius: 20px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); width: 800px; min-height: 410px; overflow: hidden; display: flex; flex-direction: column; }
+        canvas { display: block; background: #f0f4f8; }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.96); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; padding: 20px; box-sizing: border-box; text-align: center; }
+        .hidden { display: none !important; }
+        h1 { margin: 0; font-size: 48px; letter-spacing: -1px; color: var(--primary); }
+        h3 { margin: 5px 0 15px 0; color: #7f8c8d; font-weight: 400; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; }
+        .ranking-title { font-size: 14px; font-weight: 800; color: #2c3e50; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+        #leaderboard { margin-bottom: 15px; width: 340px; font-size: 15px; color: var(--primary); background: rgba(52, 152, 219, 0.08); padding: 12px; border-radius: 15px; border: 1px solid rgba(52, 152, 219, 0.2); }
+        .rank-item { display: flex; justify-content: space-between; padding: 5px 10px; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        input { padding: 12px; margin: 8px; border: 2px solid #dfe6e9; border-radius: 10px; width: 280px; font-size: 16px; text-align: center; outline: none; }
+        button { padding: 14px 40px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 18px; transition: 0.3s; }
+        button:hover { background: var(--accent); transform: scale(1.03); }
+        #hud { position: absolute; top: 15px; left: 25px; right: 25px; display: flex; justify-content: space-between; font-weight: 900; color: var(--primary); z-index: 5; font-size: 22px; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="hud" class="hidden">
+        <span>👨‍🎓 <span id="p-name"></span></span>
+        <span style="color:var(--accent)">Σ <span id="p-score">0</span></span>
+    </div>
+
+    <div id="start-screen" class="screen">
+        <h1>MATEMÁTICA <span style="color:var(--accent)">PRO</span></h1>
+        <h3>DESENVOLVIDO POR <b style="color:var(--primary)">PROF. REINALDONR</b></h3>
+        <span class="ranking-title">🏆 OS MAIORES VENCEDORES DO J.P</span>
+        <div id="leaderboard">Sincronizando recordes...</div>
+        <input type="text" id="input-name" placeholder="Nome do Aluno">
+        <button onclick="startGame()">INICIAR DESAFIO</button>
+    </div>
+
+    <div id="over-screen" class="screen hidden">
+        <h2 style="color:var(--danger); font-size: 38px; margin: 0;">CÁLCULO ENCERRADO!</h2>
+        <p style="font-size: 22px;">Pontuação final: <b id="f-score">0</b></p>
+        <button onclick="location.reload()">VER RANKING / REPETIR</button>
+    </div>
+
+    <canvas id="game" width="800" height="300"></canvas>
+</div>
+
+<script>
+    const WEB_APP = "https://script.google.com/macros/s/AKfycbxpe5DJW2mX1GNog_gRqCN_voP379UzQX-pVYJnbkAuFauIIzUxrkkjm5uyuGD--cEa/exec";
+    const canvas = document.getElementById('game'), ctx = canvas.getContext('2d');
+    
+    let running = false, score = 0, speed = 7, frame = 0, playerName = "";
+    let obstacles = [], particles = [], auraParticles = [], ghosts = [], shake = 0, parallaxX = 0, mathSymbols = [];
+    const symbolList = ["+", "−", "×", "÷", "=", "≠", ">", "<", "√", "∞", "∫", "Δ", "θ", "π", "α", "β"];
+    const colors = ["#e74c3c", "#e67e22", "#f1c40f", "#2ecc71", "#9b59b6", "#3498db"];
+
+    async function loadLeaderboard() {
+        try {
+            const res = await fetch(WEB_APP);
+            const top3 = await res.json();
+            const div = document.getElementById('leaderboard');
+            div.innerHTML = "";
+            const medals = ["🥇", "🥈", "🥉"];
+            top3.slice(0, 3).forEach((u, i) => {
+                div.innerHTML += `<div class="rank-item"><span>${medals[i]} ${u.nome}</span><span>${u.pontos} pts</span></div>`;
+            });
+        } catch (e) { document.getElementById('leaderboard').innerText = "Aguardando recordes..."; }
+    }
+    loadLeaderboard();
+
+    const player = {
+        x: 80, y: 220, vy: 0, grav: 0.85,
+        jump() { if(this.y >= 220) { this.vy = -15; spawnParticles(this.x+15, 280, "#bdc3c7"); } },
+        update() {
+            this.y += this.vy; this.vy += this.grav;
+            if(this.y > 220) { this.y = 220; this.vy = 0; }
+            if(speed > 9 && frame % 3 === 0) ghosts.push({x: this.x, y: this.y, alpha: 0.4});
+            
+            // Lógica da Aura de Newton (2500+ pts)
+            if(score >= 2500) {
+                auraParticles.push({
+                    x: this.x + Math.random() * 30,
+                    y: this.y + Math.random() * 60,
+                    vy: -Math.random() * 2,
+                    life: 1
+                });
+            }
+        },
+        draw() {
+            // Desenhar rastro de velocidade
+            ghosts.forEach((g, i) => {
+                ctx.strokeStyle = `rgba(52, 152, 219, ${g.alpha})`;
+                ctx.lineWidth = 2; ctx.strokeRect(g.x+5, g.y+5, 20, 50);
+                g.alpha -= 0.05; if(g.alpha <= 0) ghosts.splice(i,1);
+            });
+
+            // Aura de Newton (2500 pts)
+            auraParticles.forEach((p, i) => {
+                ctx.fillStyle = `rgba(52, 152, 219, ${p.life})`;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, 7); ctx.fill();
+                p.y += p.vy; p.life -= 0.05;
+                if(p.life <= 0) auraParticles.splice(i, 1);
+            });
+
+            ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 4; ctx.lineCap = "round";
+
+            // CAPA (1000+ pontos)
+            if(score >= 1000) { 
+                ctx.fillStyle = "#e74c3c"; ctx.beginPath(); 
+                ctx.moveTo(this.x+10, this.y+20);
+                ctx.lineTo(this.x-15, this.y+50+Math.sin(frame*0.2)*8);
+                ctx.lineTo(this.x+10, this.y+45); ctx.fill();
+            }
+
+            // CORPO BÁSICO
+            ctx.beginPath(); ctx.arc(this.x+15, this.y+10, 9, 0, 7); ctx.stroke(); // Cabeça
+            ctx.beginPath(); ctx.moveTo(this.x+15, this.y+19); ctx.lineTo(this.x+15, this.y+45); ctx.stroke(); // Tronco
+            let leg = Math.sin(frame * 0.25) * 15;
+            ctx.beginPath(); ctx.moveTo(this.x+15, this.y+45); ctx.lineTo(this.x+15+leg, this.y+60); ctx.stroke(); 
+            ctx.beginPath(); ctx.moveTo(this.x+15, this.y+45); ctx.lineTo(this.x+15-leg, this.y+60); ctx.stroke(); 
+
+            // COMPASSO DE OURO (2000+ pontos)
+            if(score >= 2000) {
+                ctx.strokeStyle = "#f1c40f"; ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(this.x+25, this.y+25); ctx.lineTo(this.x+45, this.y+5); // Haste 1
+                ctx.moveTo(this.x+25, this.y+25); ctx.lineTo(this.x+55, this.y+25); // Haste 2
+                ctx.stroke();
+            }
+
+            // ÓCULOS IRADO (1500+ pontos)
+            if(score >= 1500) {
+                ctx.fillStyle = "#000"; ctx.fillRect(this.x+14, this.y+8, 10, 4);
+                ctx.beginPath(); ctx.moveTo(this.x+8, this.y+10); ctx.lineTo(this.x+14, this.y+10); ctx.stroke();
+            }
+
+            // CHAPÉU CAPELO (500+ pontos)
+            if(score >= 500) { 
+                ctx.fillStyle = "#2c3e50"; ctx.fillRect(this.x+5, this.y-4, 20, 5); 
+                ctx.beginPath(); ctx.moveTo(this.x-3, this.y-4); ctx.lineTo(this.x+15, this.y-12);
+                ctx.lineTo(this.x+33, this.y-4); ctx.lineTo(this.x+15, this.y+4); ctx.fill();
+                ctx.strokeStyle = "#f1c40f"; ctx.lineWidth = 2; ctx.beginPath();
+                ctx.moveTo(this.x+33, this.y-4); ctx.lineTo(this.x+33, this.y+5); ctx.stroke();
+            }
+
+            // TROFÉU / MEDALHA (3000+ pontos)
+            if(score >= 3000) {
+                ctx.fillStyle = "#f1c40f";
+                ctx.beginPath(); ctx.arc(this.x+15, this.y+30, 6, 0, 7); ctx.fill(); // Medalha no peito
+                ctx.strokeStyle = "#e67e22"; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(this.x+10, this.y+20); ctx.lineTo(this.x+15, this.y+25);
+                ctx.lineTo(this.x+20, this.y+20); ctx.stroke(); // Fita da medalha
+            }
+        }
+    };
+
+    function spawnParticles(x, y, color) {
+        for(let i=0; i<8; i++) particles.push({x, y, vx: Math.random()*4-2, vy: Math.random()*-4, life: 1, color});
+    }
+
+    function startGame() {
+        playerName = document.getElementById('input-name').value.trim();
+        if(!playerName) return alert("Por favor, digite seu nome!");
+        document.getElementById('p-name').innerText = playerName;
+        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+        document.getElementById('hud').classList.remove('hidden');
+        running = true; loop();
+    }
+
+    function loop() {
+        if(!running) return;
+        if(shake > 0) {
+            ctx.setTransform(1, 0, 0, 1, Math.random()*shake - shake/2, 0); shake *= 0.9;
+        } else { ctx.setTransform(1, 0, 0, 1, 0, 0); }
+        ctx.clearRect(0, 0, 800, 300);
+        
+        parallaxX -= speed * 0.35; if(parallaxX < -800) parallaxX = 850;
+        ctx.fillStyle = "rgba(44, 62, 80, 0.05)"; ctx.font = "900 80px Arial";
+        ctx.fillText("PROF. REINALDONR", parallaxX, 160);
+
+        // RODAPÉ MATEMÁTICO
+        if(frame % 22 === 0) mathSymbols.push({x: 820, y: 295, char: symbolList[Math.floor(Math.random()*symbolList.length)]});
+        ctx.font = "bold 28px Arial"; 
+        mathSymbols.forEach((s, i) => {
+            s.x -= speed; ctx.fillStyle = "rgba(44, 62, 80, 0.45)"; ctx.fillText(s.char, s.x, s.y);
+            if(s.x < -30) mathSymbols.splice(i, 1);
+        });
+
+        ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.moveTo(0, 280); ctx.lineTo(800, 280); ctx.stroke();
+        player.update(); player.draw();
+        
+        // OBSTÁCULOS GIGANTES
+        if(frame % 85 === 0) {
+            const types = ['sq', 'circ', 'rect', 'tri'];
+            obstacles.push({ x: 850, type: types[Math.floor(Math.random() * types.length)], color: colors[Math.floor(Math.random() * colors.length)] });
+        }
+
+        obstacles.forEach((o, i) => {
+            o.x -= speed;
+            ctx.fillStyle = o.color; ctx.beginPath();
+            if(o.type === 'circ') { ctx.arc(o.x+32, 248, 32, 0, 7); }
+            else if(o.type === 'sq') { ctx.rect(o.x, 215, 65, 65); }
+            else if(o.type === 'rect') { ctx.rect(o.x, 235, 90, 45); }
+            else if(o.type === 'tri') { ctx.moveTo(o.x, 280); ctx.lineTo(o.x+35, 210); ctx.lineTo(o.x+70, 280); }
+            ctx.fill();
+
+            if(player.x + 25 > o.x && player.x < o.x + 55 && player.y + 55 > 215) {
+                running = false; shake = 25;
+                document.getElementById('over-screen').classList.remove('hidden');
+                document.getElementById('f-score').innerText = score;
+                fetch(WEB_APP, { method: 'POST', mode: 'no-cors', body: JSON.stringify({aluno: playerName, pontuacao: score}) });
+            }
+            if(o.x < -120) { obstacles.splice(i,1); score += 10; }
+        });
+
+        document.getElementById('p-score').innerText = score;
+        frame++; speed += 0.0015;
+        requestAnimationFrame(loop);
+    }
+
+    window.onkeydown = (e) => { if(["Space", "ArrowUp"].includes(e.code)) { e.preventDefault(); player.jump(); }};
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); player.jump(); });
+</script>
+</body>
+</html>
