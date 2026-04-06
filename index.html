@@ -89,6 +89,13 @@
     let currentPhaseName = "";
     const colors = ["#e74c3c", "#e67e22", "#f1c40f", "#2ecc71", "#9b59b6", "#3498db"];
 
+    // VERIFICA SE JÁ EXISTE NOME SALVO AO CARREGAR
+    window.onload = function() {
+        const salvo = localStorage.getItem('aluno_nome');
+        if (salvo) document.getElementById('input-name').value = salvo;
+        loadLeaderboard();
+    };
+
     async function loadLeaderboard() {
         try {
             const res = await fetch(WEB_APP);
@@ -101,7 +108,6 @@
             });
         } catch (e) { document.getElementById('leaderboard').innerText = "Aguardando recordes..."; }
     }
-    loadLeaderboard();
 
     const player = {
         x: 80, y: 220, vy: 0, grav: 0.85,
@@ -192,6 +198,10 @@
     function startGame() { 
         playerName = document.getElementById('input-name').value.trim(); 
         if(!playerName) return alert("Por favor, digite seu nome!"); 
+        
+        // SALVA O NOME PARA A PRÓXIMA VEZ
+        localStorage.setItem('aluno_nome', playerName);
+
         document.getElementById('p-name').innerText = playerName; 
         document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); 
         document.getElementById('hud').classList.remove('hidden'); 
