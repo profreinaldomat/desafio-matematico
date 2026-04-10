@@ -20,7 +20,7 @@
             position: absolute; top: 10px; left: 10px; pointer-events: none;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5); z-index: 10;
         }
-        .score-board { font-size: 20px; font-weight: bold; color: #2c3e50; transition: color 0.5s; }
+        .score-board { font-size: 22px; font-weight: bold; color: #2c3e50; transition: color 0.5s; }
         .light-text { color: #ecf0f1 !important; }
     </style>
 </head>
@@ -34,6 +34,7 @@
 </div>
 
 <script>
+    // --- CONFIGURAÇÃO DO RANKING ---
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxrbC0PJkI_XB7lMMcgmo-cVhLr45SKYzA0vmI6CIXqU7oIRjkIDxPiaBhwCLpb0yDI/exec";
     let player_name = "";
 
@@ -54,21 +55,25 @@
         x: 50, y: 300, width: 40, height: 40, dy: 0,
         jumpForce: 13, gravity: 0.7, grounded: false,
         draw() {
+            // COR BASE (Dourado se score >= 4000)
             ctx.fillStyle = (score >= 4000) ? "#FFD700" : "#3498db";
             ctx.fillRect(this.x, this.y, this.width, this.height);
 
+            // SKIN 3500: RÉGUA
             if (score >= 3500) {
                 ctx.fillStyle = "#f1c40f"; ctx.save();
                 ctx.translate(this.x + 5, this.y + 10); ctx.rotate(-0.5);
                 ctx.fillRect(0, 0, 5, 35); ctx.fillStyle = "#000";
                 for(let i=0; i<35; i+=7) ctx.fillRect(0, i, 2, 1); ctx.restore();
             }
+            // SKIN 4500: COROA
             if (score >= 4500) {
                 ctx.fillStyle = "#FFD700"; ctx.beginPath();
                 ctx.moveTo(this.x - 5, this.y); ctx.lineTo(this.x, this.y - 15);
                 ctx.lineTo(this.x + 20, this.y - 5); ctx.lineTo(this.x + 40, this.y - 15);
                 ctx.lineTo(this.x + 45, this.y); ctx.fill();
             }
+            // SKIN 5000: BRAÇOS
             if (score >= 5000) {
                 ctx.strokeStyle = "#B8860B"; ctx.lineWidth = 4;
                 let swing = Math.sin(frame * 0.2) * 12;
@@ -92,30 +97,43 @@
         let size = 30 + Math.random() * 25;
         obstacles.push({
             x: canvas.width, y: canvas.height - 20 - size,
-            width: size, height: size, speed: 6 + (score / 1200)
+            width: size, height: size, speed: 6 + (score / 1500)
         });
     }
 
     async function gameOver() {
         gameActive = false;
+        
+        // Envio do ranking em segundo plano
         if (score > 0) {
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ nome: player_name, pontos: Math.floor(score) })
-                });
-            } catch (e) { console.log("Erro no envio"); }
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nome: player_name, pontos: Math.floor(score) })
+            }).catch(e => console.log("Erro ranking"));
         }
-        alert("Fim de Jogo, " + player_name + "! Pontos: " + Math.floor(score));
-        location.reload();
+
+        alert("Fim de Jogo, " + player_name + "!\nPontos: " + Math.floor(score));
+        resetGame();
+    }
+
+    function resetGame() {
+        score = 0;
+        scoreElement.innerText = "0";
+        obstacles = [];
+        frame = 0;
+        player.y = 300;
+        player.dy = 0;
+        gameActive = true;
+        requestAnimationFrame(loop);
     }
 
     function loop() {
         if (!gameActive) return;
         frame++;
 
+        // CENÁRIO DINÂMICO (Performance 100%)
         if (score >= 4000) { 
             ctx.fillStyle = "#0a0e14"; scoreLabel.classList.add('light-text'); 
         } else if (score >= 2000) { 
@@ -125,12 +143,14 @@
         }
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        // CHÃO
         ctx.fillStyle = "#27ae60"; ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
 
         player.update();
         player.draw();
 
-        if (frame % Math.max(45, 100 - Math.floor(score/600)) === 0) spawnObstacle();
+        // Gerador de obstáculos com dificuldade progressiva
+        if (frame % Math.max(50, 110 - Math.floor(score/800)) === 0) spawnObstacle();
 
         for (let i = obstacles.length - 1; i >= 0; i--) {
             obstacles[i].x -= obstacles[i].speed;
@@ -142,6 +162,7 @@
                 player.y < obstacles[i].y + obstacles[i].height &&
                 player.y + player.height > obstacles[i].y) {
                 gameOver();
+                return;
             }
 
             if (obstacles[i].x + obstacles[i].width < 0) {
@@ -154,14 +175,22 @@
     }
 
     function init() {
-        player_name = prompt("Digite seu nome para o Ranking:", "Aluno");
-        if (!player_name) player_name = "Visitante";
+        player_name = prompt("Bem-vindo! Digite seu nome para o Ranking:", "Aluno");
+        if (!player_name || player_name.trim() === "") player_name = "Visitante";
         gameActive = true;
         loop();
     }
 
-    window.addEventListener('keydown', (e) => { if(e.code === 'Space') player.dy = player.grounded ? -player.jumpForce : player.dy; });
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(player.grounded) player.dy = -player.jumpForce; });
+    // Controles
+    window.addEventListener('keydown', (e) => { 
+        if(e.code === 'Space' || e.code === 'ArrowUp') {
+            if(player.grounded) player.dy = -player.jumpForce;
+        }
+    });
+    canvas.addEventListener('touchstart', (e) => { 
+        e.preventDefault(); 
+        if(player.grounded) player.dy = -player.jumpForce; 
+    }, {passive: false});
 
     init();
 </script>
