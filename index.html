@@ -104,7 +104,6 @@
     async function gameOver() {
         gameActive = false;
         
-        // Envio do ranking em segundo plano
         if (score > 0) {
             fetch(WEB_APP_URL, {
                 method: "POST",
@@ -126,14 +125,18 @@
         player.y = 300;
         player.dy = 0;
         gameActive = true;
-        requestAnimationFrame(loop);
+        // Não chamamos loop() aqui para não duplicar o requestAnimationFrame
     }
 
     function loop() {
-        if (!gameActive) return;
+        if (!gameActive) {
+            requestAnimationFrame(loop);
+            return;
+        }
+        
         frame++;
 
-        // CENÁRIO DINÂMICO (Performance 100%)
+        // CENÁRIO DINÂMICO
         if (score >= 4000) { 
             ctx.fillStyle = "#0a0e14"; scoreLabel.classList.add('light-text'); 
         } else if (score >= 2000) { 
@@ -149,7 +152,6 @@
         player.update();
         player.draw();
 
-        // Gerador de obstáculos com dificuldade progressiva
         if (frame % Math.max(50, 110 - Math.floor(score/800)) === 0) spawnObstacle();
 
         for (let i = obstacles.length - 1; i >= 0; i--) {
@@ -162,7 +164,6 @@
                 player.y < obstacles[i].y + obstacles[i].height &&
                 player.y + player.height > obstacles[i].y) {
                 gameOver();
-                return;
             }
 
             if (obstacles[i].x + obstacles[i].width < 0) {
@@ -175,10 +176,11 @@
     }
 
     function init() {
-        player_name = prompt("Bem-vindo! Digite seu nome para o Ranking:", "Aluno");
+        // O jogo só começa quando o nome é digitado
+        player_name = prompt("Digite seu nome para o Ranking:", "Aluno");
         if (!player_name || player_name.trim() === "") player_name = "Visitante";
         gameActive = true;
-        loop();
+        requestAnimationFrame(loop);
     }
 
     // Controles
@@ -192,6 +194,7 @@
         if(player.grounded) player.dy = -player.jumpForce; 
     }, {passive: false});
 
+    // Inicia o processo
     init();
 </script>
 </body>
