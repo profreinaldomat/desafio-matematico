@@ -34,7 +34,6 @@
 </div>
 
 <script>
-    // --- CONFIGURAÇÃO DO RANKING (URL ATUALIZADA) ---
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxrbC0PJkI_XB7lMMcgmo-cVhLr45SKYzA0vmI6CIXqU7oIRjkIDxPiaBhwCLpb0yDI/exec";
     let player_name = "";
 
@@ -55,25 +54,21 @@
         x: 50, y: 300, width: 40, height: 40, dy: 0,
         jumpForce: 13, gravity: 0.7, grounded: false,
         draw() {
-            // COR BASE (Dourado se score >= 4000)
             ctx.fillStyle = (score >= 4000) ? "#FFD700" : "#3498db";
             ctx.fillRect(this.x, this.y, this.width, this.height);
 
-            // SKIN 3500: RÉGUA
             if (score >= 3500) {
                 ctx.fillStyle = "#f1c40f"; ctx.save();
                 ctx.translate(this.x + 5, this.y + 10); ctx.rotate(-0.5);
                 ctx.fillRect(0, 0, 5, 35); ctx.fillStyle = "#000";
                 for(let i=0; i<35; i+=7) ctx.fillRect(0, i, 2, 1); ctx.restore();
             }
-            // SKIN 4500: COROA
             if (score >= 4500) {
                 ctx.fillStyle = "#FFD700"; ctx.beginPath();
                 ctx.moveTo(this.x - 5, this.y); ctx.lineTo(this.x, this.y - 15);
                 ctx.lineTo(this.x + 20, this.y - 5); ctx.lineTo(this.x + 40, this.y - 15);
                 ctx.lineTo(this.x + 45, this.y); ctx.fill();
             }
-            // SKIN 5000: BRAÇOS
             if (score >= 5000) {
                 ctx.strokeStyle = "#B8860B"; ctx.lineWidth = 4;
                 let swing = Math.sin(frame * 0.2) * 12;
@@ -121,7 +116,6 @@
         if (!gameActive) return;
         frame++;
 
-        // CENÁRIO DINÂMICO
         if (score >= 4000) { 
             ctx.fillStyle = "#0a0e14"; scoreLabel.classList.add('light-text'); 
         } else if (score >= 2000) { 
@@ -131,7 +125,6 @@
         }
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // CHÃO
         ctx.fillStyle = "#27ae60"; ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
 
         player.update();
