@@ -213,7 +213,33 @@
         /* Start screen */
         #start-screen {
             background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            justify-content: flex-start;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px 16px 80px; /* bottom padding leaves room for pinned button */
+            -webkit-overflow-scrolling: touch;
         }
+
+        /* Pinned start button — always visible at bottom of container */
+        #btn-start-fixed {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            z-index: 20;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 16px;
+            font-family: var(--font-game);
+            letter-spacing: 1px;
+            box-shadow: 0 -4px 20px rgba(56,189,248,0.3);
+            transition: all 0.2s;
+            border-radius: 0 0 14px 14px;
+        }
+        #btn-start-fixed:hover  { background: linear-gradient(135deg, #38bdf8, #818cf8); }
+        #btn-start-fixed:active { transform: scale(0.98); }
 
         .game-title {
             font-family: var(--font-game);
@@ -543,8 +569,12 @@
         <span class="ranking-title">🏆 Maiores Pontuações</span>
         <div id="leaderboard">Sincronizando recordes...</div>
         <input type="text" id="input-name" placeholder="Seu nome aqui" maxlength="20">
-        <button class="btn-main" onclick="startGame()">INICIAR DESAFIO</button>
+        <!-- Spacer so content doesn't hide behind pinned button -->
+        <div style="height:8px;flex-shrink:0;"></div>
     </div>
+
+    <!-- PINNED start button — always visible regardless of scroll -->
+    <button id="btn-start-fixed" onclick="startGame()">▶ INICIAR DESAFIO</button>
 
     <!-- PAUSE SCREEN -->
     <div id="pause-screen" class="screen hidden">
@@ -646,10 +676,10 @@ const THEMES = {
 //  SKINS
 // ─────────────────────────────────────────────
 const SKINS = {
-    estudante: { color: '#2c3e50', accent: '#3498db', name: 'Estudante' },
-    ninja:     { color: '#1a1a2e', accent: '#e94560', name: 'Ninja' },
-    robo:      { color: '#334155', accent: '#38bdf8', name: 'Robô' },
-    astro:     { color: '#1e293b', accent: '#818cf8', name: 'Astronauta' }
+    estudante: { color: '#ffffff', outline: '#1a2a3a', accent: '#38bdf8',  name: 'Estudante' },
+    ninja:     { color: '#ffffff', outline: '#0a0a1a', accent: '#f43f5e',  name: 'Ninja'     },
+    robo:      { color: '#e2e8f0', outline: '#0f172a', accent: '#38bdf8',  name: 'Robô'      },
+    astro:     { color: '#ffffff', outline: '#1e293b', accent: '#818cf8',  name: 'Astronauta'}
 };
 
 // ─────────────────────────────────────────────
@@ -1081,99 +1111,133 @@ const player = {
         }
 
         if (selectedSkin === 'robo') {
-            // Robot: boxy, mechanical
-            ctx.fillStyle = skin.color;
-            ctx.fillRect(this.x + 4, this.y, 22, 22); // head
-            ctx.fillStyle = skin.accent;
-            ctx.fillRect(this.x + 7, this.y + 5, 5, 5); // eye L
-            ctx.fillRect(this.x + 18, this.y + 5, 5, 5); // eye R
-            ctx.fillStyle = skin.color;
-            ctx.fillRect(this.x + 2, this.y + 24, 26, 28); // body
-            ctx.strokeStyle = skin.accent;
+            // Robot: boxy, mechanical — white body, dark outline
+            ctx.strokeStyle = skin.outline;
             ctx.lineWidth = 2;
-            // legs with animation
-            const legOff = Math.sin(frame * 0.25) * 12;
-            ctx.beginPath();
-            ctx.moveTo(this.x + 8, this.y + 52);
-            ctx.lineTo(this.x + 8 + legOff, this.y + 62);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(this.x + 22, this.y + 52);
-            ctx.lineTo(this.x + 22 - legOff, this.y + 62);
-            ctx.stroke();
-        } else if (selectedSkin === 'ninja') {
-            // Ninja: dark, sleek
-            ctx.strokeStyle = skin.color;
-            ctx.lineWidth = 4;
-            // Head with mask
             ctx.fillStyle = skin.color;
-            ctx.beginPath();
-            ctx.arc(this.x + 15, this.y + 9, 10, 0, Math.PI * 2);
-            ctx.fill();
+            // Head
+            ctx.beginPath(); ctx.rect(this.x + 4, this.y, 22, 22); ctx.fill(); ctx.stroke();
+            // Eyes (accent color)
             ctx.fillStyle = skin.accent;
-            ctx.fillRect(this.x + 5, this.y + 7, 20, 5); // mask band
-            // Body + cape
-            ctx.strokeStyle = skin.color;
+            ctx.fillRect(this.x + 7, this.y + 5, 5, 5);
+            ctx.fillRect(this.x + 18, this.y + 5, 5, 5);
+            // Body
+            ctx.fillStyle = skin.color;
+            ctx.beginPath(); ctx.rect(this.x + 2, this.y + 24, 26, 28); ctx.fill(); ctx.stroke();
+            // Chest detail
+            ctx.fillStyle = skin.accent + '99';
+            ctx.fillRect(this.x + 8, this.y + 28, 14, 8);
+            // Legs
+            ctx.strokeStyle = skin.outline;
+            ctx.lineWidth = 3;
+            const legOff = Math.sin(frame * 0.25) * 12;
+            ctx.beginPath(); ctx.moveTo(this.x + 8, this.y + 52); ctx.lineTo(this.x + 8 + legOff, this.y + 62); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(this.x + 22, this.y + 52); ctx.lineTo(this.x + 22 - legOff, this.y + 62); ctx.stroke();
+        } else if (selectedSkin === 'ninja') {
+            // Ninja: white body, dark outline, accent mask band
+            ctx.lineWidth = 3;
+            // Head
+            ctx.fillStyle = skin.color;
+            ctx.strokeStyle = skin.outline;
+            ctx.beginPath(); ctx.arc(this.x + 15, this.y + 9, 10, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            // Mask band (accent)
+            ctx.fillStyle = skin.accent;
+            ctx.fillRect(this.x + 5, this.y + 7, 20, 5);
+            // Eye slit
+            ctx.fillStyle = skin.outline;
+            ctx.fillRect(this.x + 8, this.y + 8, 14, 2);
+            // Body
+            ctx.fillStyle = skin.color;
+            ctx.strokeStyle = skin.outline;
             ctx.beginPath(); ctx.moveTo(this.x+15, this.y+19); ctx.lineTo(this.x+15, this.y+45); ctx.stroke();
-            ctx.fillStyle = `${skin.accent}88`;
+            // Cape (semi-transparent accent)
+            ctx.fillStyle = skin.accent + '66';
             ctx.beginPath();
             ctx.moveTo(this.x + 12, this.y + 19);
             ctx.lineTo(this.x - 8, this.y + 50 + Math.sin(frame * 0.2) * 8);
             ctx.lineTo(this.x + 12, this.y + 45);
             ctx.fill();
+            // Legs
             let leg = Math.sin(frame * 0.25) * 15;
-            ctx.strokeStyle = skin.color;
+            ctx.strokeStyle = skin.outline;
+            ctx.lineWidth = 3;
             ctx.beginPath(); ctx.moveTo(this.x+15,this.y+45); ctx.lineTo(this.x+15+leg,this.y+62); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(this.x+15,this.y+45); ctx.lineTo(this.x+15-leg,this.y+62); ctx.stroke();
         } else if (selectedSkin === 'astro') {
-            // Astronaut: rounded helmet, backpack
+            // Astronaut: white suit, dark outline, accent visor
             ctx.fillStyle = skin.color;
+            ctx.strokeStyle = skin.outline;
+            ctx.lineWidth = 2;
+            // Helmet
+            ctx.beginPath(); ctx.arc(this.x + 15, this.y + 11, 12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            // Visor (accent color)
+            ctx.fillStyle = skin.accent + 'cc';
+            ctx.beginPath(); ctx.ellipse(this.x + 15, this.y + 10, 8, 7, 0, 0, Math.PI * 2); ctx.fill();
+            // Visor shine
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.beginPath(); ctx.ellipse(this.x + 12, this.y + 7, 3, 2, -0.5, 0, Math.PI * 2); ctx.fill();
+            // Suit body (compatible rounded rect)
+            ctx.fillStyle = skin.color;
+            ctx.strokeStyle = skin.outline;
+            ctx.lineWidth = 2;
+            const rx=4, sx=this.x+5, sy=this.y+22, sw=20, sh=25;
             ctx.beginPath();
-            ctx.arc(this.x + 15, this.y + 11, 12, 0, Math.PI * 2);
-            ctx.fill();
-            // Visor
-            ctx.fillStyle = skin.accent + 'aa';
-            ctx.beginPath();
-            ctx.ellipse(this.x + 15, this.y + 10, 8, 7, 0, 0, Math.PI * 2);
-            ctx.fill();
-            // Suit
-            ctx.fillStyle = '#e2e8f0';
-            ctx.beginPath();
-            ctx.roundRect(this.x + 5, this.y + 22, 20, 25, 4);
-            ctx.fill();
+            ctx.moveTo(sx+rx,sy); ctx.lineTo(sx+sw-rx,sy); ctx.arcTo(sx+sw,sy,sx+sw,sy+rx,rx);
+            ctx.lineTo(sx+sw,sy+sh-rx); ctx.arcTo(sx+sw,sy+sh,sx+sw-rx,sy+sh,rx);
+            ctx.lineTo(sx+rx,sy+sh); ctx.arcTo(sx,sy+sh,sx,sy+sh-rx,rx);
+            ctx.lineTo(sx,sy+rx); ctx.arcTo(sx,sy,sx+rx,sy,rx);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            // Chest badge (accent)
+            ctx.fillStyle = skin.accent + '88';
+            ctx.fillRect(this.x + 9, this.y + 26, 12, 7);
             // Backpack
-            ctx.fillStyle = skin.color;
-            ctx.fillRect(this.x + 22, this.y + 22, 10, 18);
+            ctx.fillStyle = '#cbd5e1';
+            ctx.strokeStyle = skin.outline;
+            ctx.beginPath(); ctx.rect(this.x + 22, this.y + 22, 10, 18); ctx.fill(); ctx.stroke();
             // Legs
             let leg = Math.sin(frame * 0.25) * 13;
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeStyle = skin.outline;
             ctx.lineWidth = 5;
+            ctx.strokeStyle = '#cbd5e1';
             ctx.beginPath(); ctx.moveTo(this.x+10,this.y+47); ctx.lineTo(this.x+10+leg,this.y+62); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(this.x+20,this.y+47); ctx.lineTo(this.x+20-leg,this.y+62); ctx.stroke();
-            // Propulsion particles when airborne
+            // Propulsion
             if (!this.isGrounded && frame % 3 === 0) {
                 spawnParticles(this.x + 12, this.y + 47, skin.accent, 2);
             }
         } else {
-            // Default: Estudante (original style, enhanced)
-            ctx.strokeStyle = skin.color;
-            ctx.lineWidth = 4;
+            // Estudante: white stick figure with dark outline for contrast
+            ctx.strokeStyle = skin.outline;
+            ctx.lineWidth = 6;
             ctx.lineCap = 'round';
-            // Head
+            // Outline pass (dark, thick)
             ctx.beginPath(); ctx.arc(this.x+15, this.y+10, 9, 0, Math.PI * 2); ctx.stroke();
-            // Body
             ctx.beginPath(); ctx.moveTo(this.x+15, this.y+19); ctx.lineTo(this.x+15, this.y+45); ctx.stroke();
-            // Legs
             let leg = Math.sin(frame * 0.25) * 15;
             ctx.beginPath(); ctx.moveTo(this.x+15,this.y+45); ctx.lineTo(this.x+15+leg,this.y+62); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(this.x+15,this.y+45); ctx.lineTo(this.x+15-leg,this.y+62); ctx.stroke();
+            // Arms
+            let armSwing = Math.sin(frame * 0.25 + Math.PI) * 12;
+            ctx.beginPath(); ctx.moveTo(this.x+15,this.y+25); ctx.lineTo(this.x+15+armSwing,this.y+38); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(this.x+15,this.y+25); ctx.lineTo(this.x+15-armSwing,this.y+38); ctx.stroke();
+            // White fill pass (thin, bright)
+            ctx.strokeStyle = skin.color;
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(this.x+15, this.y+10, 9, 0, Math.PI * 2); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(this.x+15, this.y+19); ctx.lineTo(this.x+15, this.y+45); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(this.x+15,this.y+45); ctx.lineTo(this.x+15+leg,this.y+62); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(this.x+15,this.y+45); ctx.lineTo(this.x+15-leg,this.y+62); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(this.x+15,this.y+25); ctx.lineTo(this.x+15+armSwing,this.y+38); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(this.x+15,this.y+25); ctx.lineTo(this.x+15-armSwing,this.y+38); ctx.stroke();
 
-            // Evolução visual (mantida do original)
+            // Evolução visual
             if (score >= 500) {
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = skin.outline; ctx.lineWidth = 4;
                 ctx.beginPath(); ctx.arc(this.x+10,this.y+10,4,0,Math.PI*2); ctx.stroke();
                 ctx.beginPath(); ctx.arc(this.x+20,this.y+10,4,0,Math.PI*2); ctx.stroke();
-                ctx.lineWidth = 4;
+                ctx.strokeStyle = skin.color; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(this.x+10,this.y+10,4,0,Math.PI*2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(this.x+20,this.y+10,4,0,Math.PI*2); ctx.stroke();
             }
             if (score >= 1000) {
                 ctx.fillStyle = skin.accent + 'cc';
@@ -1184,13 +1248,19 @@ const player = {
                 ctx.fill();
             }
             if (score >= 1500) {
+                // Hat outline
+                ctx.fillStyle = skin.outline;
+                ctx.fillRect(this.x+4,this.y-5,22,6);
+                ctx.beginPath(); ctx.moveTo(this.x-4,this.y-5); ctx.lineTo(this.x+15,this.y-16); ctx.lineTo(this.x+34,this.y-5); ctx.lineTo(this.x+15,this.y+5); ctx.fill();
+                // Hat white
                 ctx.fillStyle = skin.color;
                 ctx.fillRect(this.x+5,this.y-4,20,5);
-                ctx.beginPath();
-                ctx.moveTo(this.x-3,this.y-4); ctx.lineTo(this.x+15,this.y-14); ctx.lineTo(this.x+33,this.y-4); ctx.lineTo(this.x+15,this.y+6);
-                ctx.fill();
+                ctx.beginPath(); ctx.moveTo(this.x-3,this.y-4); ctx.lineTo(this.x+15,this.y-14); ctx.lineTo(this.x+33,this.y-4); ctx.lineTo(this.x+15,this.y+6); ctx.fill();
             }
             if (score >= 2000) {
+                ctx.fillStyle = skin.outline;
+                ctx.beginPath(); ctx.moveTo(this.x+5,this.y+6); ctx.lineTo(this.x-6,this.y-11); ctx.lineTo(this.x+11,this.y+1); ctx.fill();
+                ctx.beginPath(); ctx.moveTo(this.x+25,this.y+6); ctx.lineTo(this.x+36,this.y-11); ctx.lineTo(this.x+19,this.y+1); ctx.fill();
                 ctx.fillStyle = skin.color;
                 ctx.beginPath(); ctx.moveTo(this.x+5,this.y+5); ctx.lineTo(this.x-5,this.y-10); ctx.lineTo(this.x+10,this.y); ctx.fill();
                 ctx.beginPath(); ctx.moveTo(this.x+25,this.y+5); ctx.lineTo(this.x+35,this.y-10); ctx.lineTo(this.x+20,this.y); ctx.fill();
@@ -1664,6 +1734,7 @@ function startGame() {
 
     document.getElementById('p-name').innerText = playerName;
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById('btn-start-fixed').classList.add('hidden');
     document.getElementById('hud').classList.remove('hidden');
     document.getElementById('phase-banner').classList.remove('hidden');
     document.getElementById('progress-wrap').classList.remove('hidden');
