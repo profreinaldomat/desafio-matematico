@@ -1095,15 +1095,15 @@ function spawnCoin() {
 }
  
 function drawCoins() {
-    coins.forEach((c, i) => {
+    for (let i = coins.length - 1; i >= 0; i--) {
+        const c = coins[i];
         c.x -= speed;
         c.frame += 0.1;
-        if (c.collected || c.x < -20) { coins.splice(i, 1); return; }
+        if (c.collected || c.x < -20) { coins.splice(i, 1); continue; }
  
         const bob = Math.sin(c.frame) * 4;
         ctx.save();
         ctx.globalAlpha = 0.9;
-        // Glow
         ctx.shadowBlur = 12;
         ctx.shadowColor = '#fbbf24';
         ctx.fillStyle = '#fbbf24';
@@ -1121,12 +1121,12 @@ function drawCoins() {
         const px = player.x + 15, py = player.y + 30;
         const dx = px - c.x, dy = py - (c.y + bob);
         if (Math.sqrt(dx*dx + dy*dy) < 22) {
-            c.collected = true;
+            coins.splice(i, 1);
             score += 25 * comboMultiplier;
             spawnParticles(c.x, c.y, '#fbbf24', 6);
             playSound('coin');
         }
-    });
+    }
 }
  
 // ─────────────────────────────────────────────
@@ -1148,7 +1148,7 @@ function spawnParticles(x, y, color, count=8) {
 // ─────────────────────────────────────────────
 //  PLAYER
 // ─────────────────────────────────────────────
-const GROUND_Y = 230;
+const GROUND_Y = 248;
  
 const player = {
     x: 80,
@@ -1329,9 +1329,8 @@ const player = {
             ctx.beginPath(); ctx.rect(this.x + 22, this.y + 22, 10, 18); ctx.fill(); ctx.stroke();
             // Legs
             let leg = Math.sin(frame * 0.25) * 13;
-            ctx.strokeStyle = skin.outline;
-            ctx.lineWidth = 5;
             ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 5;
             ctx.beginPath(); ctx.moveTo(this.x+10,this.y+47); ctx.lineTo(this.x+10+leg,this.y+62); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(this.x+20,this.y+47); ctx.lineTo(this.x+20-leg,this.y+62); ctx.stroke();
             // Propulsion
@@ -1523,9 +1522,8 @@ const OBS_COLORS = {
 function maybeSpawnPowerup() {
     if (score < 300) return;
     const r = Math.random();
-    if (r < 0.008 && !shieldActive)  spawnPowerup('shield');
-    if (r > 0.992 && !slowmoActive)  spawnPowerup('slowmo');
-    if (r > 0.988 && r < 0.992)      spawnCoin();
+    if (r < 0.008 && !shieldActive) spawnPowerup('shield');
+    if (r > 0.992 && !slowmoActive) spawnPowerup('slowmo');
 }
  
 let powerups = [];
@@ -1534,10 +1532,11 @@ function spawnPowerup(type) {
 }
  
 function drawPowerups() {
-    powerups.forEach((p, i) => {
+    for (let i = powerups.length - 1; i >= 0; i--) {
+        const p = powerups[i];
         p.x -= speed;
         p.frame += 0.08;
-        if (p.x < -30) { powerups.splice(i, 1); return; }
+        if (p.x < -30) { powerups.splice(i, 1); continue; }
  
         const bob = Math.sin(p.frame) * 5;
         ctx.save();
@@ -1574,7 +1573,6 @@ function drawPowerups() {
             ctx.textAlign = 'center';
             ctx.fillText('⏱', p.x + 10, p.y + 5 + bob);
         }
- 
         ctx.restore();
  
         // Collision check
@@ -1586,7 +1584,7 @@ function drawPowerups() {
             spawnParticles(p.x, p.y, p.type === 'shield' ? '#38bdf8' : '#a78bfa', 10);
             powerups.splice(i, 1);
         }
-    });
+    }
 }
  
 // ─────────────────────────────────────────────
@@ -1612,7 +1610,7 @@ function drawBackground() {
     ctx.fillStyle = 'rgba(255,255,255,0.04)';
     ctx.font = '900 70px "Orbitron", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('PROF. REINALDONR', parallaxX + 400, 70);
+    ctx.fillText('PROF. REINALDONR', parallaxX, 70);
     ctx.restore();
  
     // Ground
@@ -1660,7 +1658,8 @@ function drawObstacles() {
     const theme = THEMES[selectedTheme];
     const curSpeed = (slowmoActive ? speed * 0.4 : speed) + 1;
  
-    obstacles.forEach((o, i) => {
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+        const o = obstacles[i];
         o.x -= curSpeed;
  
         ctx.save();
@@ -1671,73 +1670,53 @@ function drawObstacles() {
         ctx.fillStyle = o.color;
         ctx.beginPath();
  
-        const gY = H - 60; // ground Y
-        if (o.type === 'circ') {
-            ctx.arc(o.x + 28, gY - 28, 28, 0, Math.PI * 2);
-        } else if (o.type === 'sq') {
-            ctx.rect(o.x, gY - 60, 58, 60);
-        } else if (o.type === 'rect') {
-            ctx.rect(o.x, gY - 40, 80, 40);
-        } else if (o.type === 'tri') {
-            ctx.moveTo(o.x, gY);
-            ctx.lineTo(o.x + 32, gY - 65);
-            ctx.lineTo(o.x + 64, gY);
-        }
+        const gY = H - 60;
+        if (o.type === 'circ')  ctx.arc(o.x + 28, gY - 28, 28, 0, Math.PI * 2);
+        else if (o.type === 'sq')   ctx.rect(o.x, gY - 60, 58, 60);
+        else if (o.type === 'rect') ctx.rect(o.x, gY - 40, 80, 40);
+        else if (o.type === 'tri')  { ctx.moveTo(o.x, gY); ctx.lineTo(o.x+32, gY-65); ctx.lineTo(o.x+64, gY); }
         ctx.fill();
- 
-        // Obstacle outline
         ctx.strokeStyle = 'rgba(255,255,255,0.2)';
         ctx.lineWidth = 1;
         ctx.stroke();
         ctx.restore();
  
-        // Collision check
+        // Hitbox — tighter than visual for fair play
+        const hitW = o.type === 'rect' ? 76 : o.type === 'tri' ? 60 : 54;
+        const hitH = o.type === 'sq' ? 58 : o.type === 'rect' ? 38 : o.type === 'circ' ? 54 : 62;
         const px = player.x, py = player.y;
-        const hitW = o.type === 'rect' ? 80 : o.type === 'tri' ? 64 : 58;
-        const hitH = o.type === 'sq' ? 60 : o.type === 'rect' ? 40 : o.type === 'tri' ? 65 : 56;
- 
-        const colliding = (px + 28 > o.x + 4) && (px < o.x + hitW - 4) && (py + 58 > gY - hitH + 4);
+        const gnd = H - 60;
+        const colliding = (px + 26 > o.x + 4) && (px + 4 < o.x + hitW) && (py + 55 > gnd - hitH + 4);
  
         if (colliding) {
             if (shieldActive) {
-                shieldActive = false;
-                shieldTimer = 0;
-                shake = 8;
-                spawnParticles(o.x, gY - 30, '#38bdf8', 12);
+                shieldActive = false; shieldTimer = 0; shake = 8;
+                spawnParticles(o.x, gnd - 30, '#38bdf8', 12);
                 playSound('shield');
                 obstacles.splice(i, 1);
-                return;
+                continue;
             }
-            // Death
-            running = false;
-            shake = 30;
-            playSound('die');
-            stopBgMusic();
+            running = false; shake = 30;
+            playSound('die'); stopBgMusic();
             document.getElementById('over-screen').classList.remove('hidden');
             document.getElementById('f-score').innerText = score;
             document.getElementById('over-phase').innerText = currentPhaseName;
-            fetch(WEB_APP, {
-                method: 'POST', mode: 'no-cors',
-                body: JSON.stringify({ aluno: playerName, pontuacao: score })
-            }).catch(() => {});
+            fetch(WEB_APP, { method:'POST', mode:'no-cors', body: JSON.stringify({aluno:playerName, pontuacao:score}) }).catch(()=>{});
         }
  
-        // Passed obstacle
         if (o.x < -120) {
             obstacles.splice(i, 1);
             combo++;
             comboMultiplier = Math.min(1 + Math.floor(combo / 5), 4);
-            const pts = 10 * comboMultiplier;
-            score += pts;
-            playSound(combo > 0 && combo % 5 === 0 ? 'combo' : 'point');
-            if (combo > 0 && combo % 5 === 0) showComboPopup();
- 
+            score += 10 * comboMultiplier;
+            playSound(combo % 5 === 0 ? 'combo' : 'point');
+            if (combo % 5 === 0) showComboPopup();
             if (comboMultiplier > 1) {
                 document.getElementById('combo-display').classList.remove('hidden');
                 document.getElementById('combo-val').innerText = comboMultiplier;
             }
         }
-    });
+    }
 }
  
 function showComboPopup() {
@@ -1751,7 +1730,8 @@ function showComboPopup() {
 //  PARTICLES DRAW
 // ─────────────────────────────────────────────
 function drawParticles() {
-    particles.forEach((p, i) => {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
         ctx.save();
         ctx.fillStyle = p.color;
         ctx.globalAlpha = p.life;
@@ -1761,7 +1741,7 @@ function drawParticles() {
         ctx.restore();
         p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life -= 0.025;
         if (p.life <= 0) particles.splice(i, 1);
-    });
+    }
 }
  
 // ─────────────────────────────────────────────
@@ -1987,3 +1967,4 @@ window.toggleSound  = toggleSound;
 </script>
 </body>
 </html>
+ 
