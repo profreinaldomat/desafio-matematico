@@ -1,3 +1,6 @@
+Index · HTML
+Copiar
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -117,6 +120,23 @@
  
         .hud-score { color: var(--accent); font-size: 16px; }
         .hud-combo { color: var(--gold); font-size: 13px; }
+ 
+        /* Lives HUD */
+        #lives-hud { gap: 2px; }
+        #lives-display { font-size: 14px; letter-spacing: 1px; line-height: 1; }
+ 
+        /* Life-lost flash overlay */
+        #life-flash {
+            position: absolute;
+            inset: 0;
+            background: rgba(220, 38, 38, 0.45);
+            pointer-events: none;
+            z-index: 8;
+            opacity: 0;
+            border-radius: 14px;
+            transition: opacity 0.08s;
+        }
+        #life-flash.active { opacity: 1; }
  
         #btn-pause {
             pointer-events: auto;
@@ -531,12 +551,17 @@
         }
         #mk-sub {
             font-family: var(--font-game);
-            font-size: clamp(8px, 2vw, 11px);
+            font-size: clamp(7px, 1.6vw, 10px);
             color: #ffd700;
-            letter-spacing: 4px;
-            text-shadow: 0 0 10px #ffaa00;
-            margin-top: 4px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #ffaa00, 0 0 20px #ff8800;
+            margin-top: 6px;
             text-transform: uppercase;
+            animation: mk-pulse 0.6s ease-in-out infinite alternate;
+        }
+        @keyframes mk-pulse {
+            from { text-shadow: 0 0 8px #ffaa00, 0 0 16px #ff8800; opacity: 0.85; }
+            to   { text-shadow: 0 0 18px #ffd700, 0 0 35px #ffcc00; opacity: 1; }
         }
  
         @media (orientation: portrait) {
@@ -571,6 +596,9 @@
         <div class="hud-block">
             <span class="hud-score">Σ <span id="p-score">0</span></span>
             <span class="hud-combo hidden" id="combo-display">x<span id="combo-val">1</span></span>
+        </div>
+        <div class="hud-block" id="lives-hud">
+            <span id="lives-display">❤️❤️❤️</span>
         </div>
     </div>
  
@@ -704,7 +732,7 @@
         </div>
         <div id="mk-text-wrap">
             <div id="mk-phase-name"></div>
-            <div id="mk-sub">FASE DESBLOQUEADA!</div>
+            <div id="mk-sub">PROF. REINALDONR DESBLOQUEOU A FASE!</div>
         </div>
     </div>
  
@@ -724,6 +752,9 @@
             VER RANKING / REPETIR
         </button>
     </div>
+ 
+    <!-- Life-lost red flash overlay -->
+    <div id="life-flash"></div>
  
     <canvas id="game" width="820" height="310" tabindex="0"></canvas>
 </div>
@@ -756,6 +787,12 @@ let coins = [];
 let isMobile = /Mobi|Android/i.test(navigator.userAgent);
 const SPEED_MAX = 10;
 const SPEED_INC = 0.002;
+// Vidas
+let lives = 3;
+const MAX_LIVES = 3;
+let invincible = false;   // invencibilidade temporária após perder vida
+let invincTimer = 0;      // frames de invencibilidade (120 = ~2s)
+let lifeFlash = 0;        // frames do flash vermelho na tela
  
 // Web Audio
 let audioCtx = null;
@@ -1198,10 +1235,19 @@ const player = {
             slowmoTimer--;
             if (slowmoTimer <= 0) slowmoActive = false;
         }
+ 
+        // Invencibilidade pós-colisão
+        if (invincible) {
+            invincTimer--;
+            if (invincTimer <= 0) { invincible = false; invincTimer = 0; }
+        }
     },
  
     draw() {
         const skin = SKINS[selectedSkin];
+ 
+        // Durante invencibilidade: personagem pisca (alterna visibilidade a cada 6 frames)
+        if (invincible && frame % 12 < 6) return;
  
         // Ghost trail
         ghosts.forEach((g, i) => {
@@ -1696,12 +1742,8 @@ function drawObstacles() {
                 obstacles.splice(i, 1);
                 continue;
             }
-            running = false; shake = 30;
-            playSound('die'); stopBgMusic();
-            document.getElementById('over-screen').classList.remove('hidden');
-            document.getElementById('f-score').innerText = score;
-            document.getElementById('over-phase').innerText = currentPhaseName;
-            fetch(WEB_APP, { method:'POST', mode:'no-cors', body: JSON.stringify({aluno:playerName, pontuacao:score}) }).catch(()=>{});
+            if (invincible) continue; // dentro do período de graça
+            loseLife(o, i, gnd);
         }
  
         if (o.x < -120) {
@@ -1724,6 +1766,60 @@ function showComboPopup() {
     el.textContent = `x${comboMultiplier} COMBO!`;
     el.style.transform = 'translate(-50%, -50%) scale(1.2)';
     setTimeout(() => { el.style.transform = 'translate(-50%, -50%) scale(0)'; }, 800);
+}
+ 
+// ─────────────────────────────────────────────
+//  LIVES SYSTEM
+// ─────────────────────────────────────────────
+function updateLivesHUD() {
+    const full  = '❤️';
+    const empty = '🖤';
+    let display = '';
+    for (let i = 0; i < MAX_LIVES; i++) {
+        display += (i < lives) ? full : empty;
+    }
+    document.getElementById('lives-display').textContent = display;
+}
+ 
+function loseLife(obstacle, obsIndex, gnd) {
+    lives--;
+    updateLivesHUD();
+    shake = 30;
+    playSound('die');
+ 
+    // Remover o obstáculo que causou a colisão
+    obstacles.splice(obsIndex, 1);
+ 
+    // Reset de combo ao perder vida
+    combo = 0;
+    comboMultiplier = 1;
+    document.getElementById('combo-display').classList.add('hidden');
+ 
+    if (lives <= 0) {
+        // Game over de verdade
+        running = false;
+        stopBgMusic();
+        document.getElementById('over-screen').classList.remove('hidden');
+        document.getElementById('f-score').innerText = score;
+        document.getElementById('over-phase').innerText = currentPhaseName;
+        fetch(WEB_APP, { method:'POST', mode:'no-cors',
+            body: JSON.stringify({ aluno: playerName, pontuacao: score })
+        }).catch(() => {});
+        return;
+    }
+ 
+    // Ainda tem vidas — período de graça de 120 frames (~2s)
+    invincible = true;
+    invincTimer = 120;
+    lifeFlash = 18; // frames de flash vermelho
+ 
+    // Partículas vermelhas de impacto
+    spawnParticles(player.x + 15, player.y + 30, '#f43f5e', 14);
+ 
+    // Flash vermelho na tela
+    const flashEl = document.getElementById('life-flash');
+    flashEl.classList.add('active');
+    setTimeout(() => flashEl.classList.remove('active'), 300);
 }
  
 // ─────────────────────────────────────────────
@@ -1901,6 +1997,12 @@ function startGame() {
     if (!playerName) return alert('Por favor, digite seu nome!');
     localStorage.setItem('aluno_nome', playerName);
  
+    // Reset estado
+    lives = MAX_LIVES;
+    invincible = false;
+    invincTimer = 0;
+    lifeFlash = 0;
+ 
     document.getElementById('p-name').innerText = playerName;
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById('btn-start-fixed').classList.add('hidden');
@@ -1908,6 +2010,7 @@ function startGame() {
     document.getElementById('phase-banner').classList.remove('hidden');
     document.getElementById('progress-wrap').classList.remove('hidden');
     document.getElementById('sound-toggle').classList.remove('hidden');
+    updateLivesHUD();
  
     initWeather();
     if (selectedTheme === 'cidade') initBuildings();
@@ -1961,10 +2064,10 @@ function hexToRgb(hex) {
 }
  
 // Expõe funções globais chamadas via onclick no HTML
-window.startGame    = startGame;
-window.togglePause  = togglePause;
-window.toggleSound  = toggleSound;
+window.startGame      = startGame;
+window.togglePause    = togglePause;
+window.toggleSound    = toggleSound;
+window.updateLivesHUD = updateLivesHUD;
 </script>
 </body>
 </html>
- 
