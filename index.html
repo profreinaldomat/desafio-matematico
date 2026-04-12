@@ -758,9 +758,7 @@
 
 <script>
 // ─────────────────────────────────────────────
-//  CONFIG
-// ─────────────────────────────────────────────
-//  SISTEMA DE RANKING - CORRIGIDO
+//  SISTEMA DE RANKING - VERSÃO FINAL CORRIGIDA
 // ─────────────────────────────────────────────
 const WEB_APP = "https://script.google.com/macros/s/AKfycbxQgWC2B-8HFHkredP2v2-iuIJPJdYgfHaN6g2dFxFcF3oTLCvUeWlqrfEO1C8q-V2i/exec";
 
@@ -768,8 +766,16 @@ async function loadLeaderboard() {
     const list = document.getElementById('leaderboard-list');
     try {
         const response = await fetch(WEB_APP);
-        const data = await response.json();
+        const text = await response.text(); // Lê como texto primeiro para evitar erro de JSON
         
+        // Se o Google mandar erro (HTML), não tenta converter para JSON
+        if (text.startsWith("<!DOCTYPE")) {
+            console.error("O script retornou HTML (Erro de permissão ou URL)");
+            list.innerHTML = '<li>Erro: Verifique a publicação do Script</li>';
+            return;
+        }
+
+        const data = JSON.parse(text);
         if (!data || data.length === 0) {
             list.innerHTML = '<li>Aguardando campeões...</li>';
             return;
@@ -782,10 +788,30 @@ async function loadLeaderboard() {
             </li>
         `).join('');
     } catch (err) {
-        console.error("Erro ao carregar ranking:", err);
+        console.error("Erro no Ranking:", err);
         list.innerHTML = '<li>Ranking indisponível</li>';
     }
 }
+
+function saveScore(name, score) {
+    const faseAlcancada = (typeof currentLevel !== 'undefined') ? currentLevel : "Fase Final";
+
+    fetch(WEB_APP, {
+        method: "POST",
+        mode: "no-cors", 
+        body: JSON.stringify({
+            aluno: name,
+            pontuacao: score,
+            fase: faseAlcancada
+        })
+    }).then(() => {
+        setTimeout(loadLeaderboard, 1500); // Dá um tempo para a planilha gravar
+    });
+}
+
+// Carrega o ranking ao abrir a página
+window.addEventListener('load', loadLeaderboard);
+</script>
 
 function saveScore(name, score) {
     // Pega a fase real do jogo (estamos usando a variável score ou nivel se existir)
