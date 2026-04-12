@@ -765,17 +765,10 @@ const WEB_APP = "https://script.google.com/macros/s/AKfycbxQgWC2B-8HFHkredP2v2-i
 async function loadLeaderboard() {
     const list = document.getElementById('leaderboard-list');
     try {
-        const response = await fetch(WEB_APP);
-        const text = await response.text(); // Lê como texto primeiro para evitar erro de JSON
+        // Adicionamos um timestamp para evitar que o navegador use o cache do erro
+        const response = await fetch(WEB_APP + "?t=" + new Date().getTime());
+        const data = await response.json();
         
-        // Se o Google mandar erro (HTML), não tenta converter para JSON
-        if (text.startsWith("<!DOCTYPE")) {
-            console.error("O script retornou HTML (Erro de permissão ou URL)");
-            list.innerHTML = '<li>Erro: Verifique a publicação do Script</li>';
-            return;
-        }
-
-        const data = JSON.parse(text);
         if (!data || data.length === 0) {
             list.innerHTML = '<li>Aguardando campeões...</li>';
             return;
@@ -789,10 +782,9 @@ async function loadLeaderboard() {
         `).join('');
     } catch (err) {
         console.error("Erro no Ranking:", err);
-        list.innerHTML = '<li>Ranking indisponível</li>';
+        list.innerHTML = '<li>Ranking temporariamente indisponível</li>';
     }
 }
-
 function saveScore(name, score) {
     const faseAlcancada = (typeof currentLevel !== 'undefined') ? currentLevel : "Fase Final";
 
