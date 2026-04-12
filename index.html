@@ -23,9 +23,9 @@
             --font-game: 'Orbitron', sans-serif;
             --font-ui: 'Exo 2', sans-serif;
         }
- 
+
         * { box-sizing: border-box; }
- 
+
         body {
             margin: 0;
             background: #080c14;
@@ -37,7 +37,7 @@
             overflow: hidden;
             touch-action: none;
         }
- 
+
         /* Stars background */
         body::before {
             content: '';
@@ -55,7 +55,7 @@
             pointer-events: none;
             z-index: 0;
         }
- 
+
         #game-container {
             position: relative;
             background: #111827;
@@ -74,7 +74,7 @@
             flex-direction: column;
             z-index: 1;
         }
- 
+
         canvas {
             display: block;
             width: 100%;
@@ -85,7 +85,7 @@
             outline: none;
             border-radius: 0 0 14px 14px;
         }
- 
+
         /* HUD */
         #hud {
             position: absolute;
@@ -103,7 +103,7 @@
             pointer-events: none;
             gap: 8px;
         }
- 
+
         .hud-block {
             background: rgba(15,23,42,0.7);
             border: 1px solid rgba(56,189,248,0.2);
@@ -114,14 +114,14 @@
             gap: 6px;
             backdrop-filter: blur(4px);
         }
- 
+
         .hud-score { color: var(--accent); font-size: 16px; }
         .hud-combo { color: var(--gold); font-size: 13px; }
- 
+
         /* Lives HUD */
         #lives-hud { gap: 2px; }
         #lives-display { font-size: 14px; letter-spacing: 1px; line-height: 1; }
- 
+
         /* Life-lost flash overlay */
         #life-flash {
             position: absolute;
@@ -134,7 +134,7 @@
             transition: opacity 0.08s;
         }
         #life-flash.active { opacity: 1; }
- 
+
         #btn-pause {
             pointer-events: auto;
             background: rgba(15,23,42,0.8);
@@ -154,7 +154,7 @@
             transition: all 0.2s;
         }
         #btn-pause:hover { background: rgba(56,189,248,0.2); }
- 
+
         /* Phase banner */
         #phase-banner {
             position: absolute;
@@ -178,7 +178,7 @@
             backdrop-filter: blur(4px);
         }
         .phase-up { transform: translateX(-50%) scale(1.2) !important; color: var(--gold) !important; border-color: var(--gold) !important; box-shadow: 0 0 30px rgba(251,191,36,0.4) !important; }
- 
+
         /* Progress bar */
         #progress-wrap {
             position: absolute;
@@ -210,7 +210,7 @@
             color: rgba(255,255,255,0.4);
             white-space: nowrap;
         }
- 
+
         /* Screens */
         .screen {
             position: absolute;
@@ -226,7 +226,7 @@
             text-align: center;
         }
         .hidden { display: none !important; }
- 
+
         /* Start screen */
         #start-screen {
             background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
@@ -236,7 +236,7 @@
             padding: 12px 16px 80px; /* bottom padding leaves room for pinned button */
             -webkit-overflow-scrolling: touch;
         }
- 
+
         /* Pinned start button — always visible at bottom of container */
         #btn-start-fixed {
             position: absolute;
@@ -257,7 +257,7 @@
         }
         #btn-start-fixed:hover  { background: linear-gradient(135deg, #38bdf8, #818cf8); }
         #btn-start-fixed:active { transform: scale(0.98); }
- 
+
         .game-title {
             font-family: var(--font-game);
             font-size: clamp(22px, 6vw, 42px);
@@ -268,7 +268,7 @@
             text-shadow: 0 0 30px rgba(56,189,248,0.5);
         }
         .game-title span { color: var(--accent); }
- 
+
         .game-subtitle {
             font-family: var(--font-ui);
             font-size: 11px;
@@ -278,7 +278,7 @@
             letter-spacing: 3px;
             margin: 0 0 16px 0;
         }
- 
+
         /* Skin selector */
         .skin-section {
             margin-bottom: 14px;
@@ -319,7 +319,7 @@
         .skin-btn:hover { background: rgba(56,189,248,0.1); border-color: rgba(56,189,248,0.4); }
         .skin-btn.active { background: rgba(56,189,248,0.2); border-color: var(--accent); color: var(--accent); }
         .skin-preview { font-size: 20px; line-height: 1; }
- 
+
         /* Theme selector */
         .theme-grid {
             display: flex;
@@ -345,7 +345,7 @@
         }
         .theme-btn:hover { background: rgba(255,255,255,0.1); }
         .theme-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(251,191,36,0.1); }
- 
+
         /* Leaderboard */
         .ranking-title {
             font-size: 10px;
@@ -376,7 +376,7 @@
             font-family: var(--font-ui);
         }
         .rank-item:last-child { border-bottom: none; }
- 
+
         input {
             padding: 12px 16px;
             margin: 6px 0 10px;
@@ -395,7 +395,7 @@
         }
         input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(56,189,248,0.2); }
         input::placeholder { color: rgba(255,255,255,0.3); }
- 
+
         button.btn-main {
             padding: 13px 36px;
             background: linear-gradient(135deg, #0ea5e9, #6366f1);
@@ -412,7 +412,7 @@
         }
         button.btn-main:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(56,189,248,0.4); }
         button.btn-main:active { transform: translateY(0); }
- 
+
         /* Pause screen */
         #pause-screen {
             background: rgba(8,12,20,0.95);
@@ -425,7 +425,7 @@
             margin-bottom: 20px;
             text-shadow: 0 0 30px rgba(56,189,248,0.5);
         }
- 
+
         /* Game over screen */
         #over-screen {
             background: linear-gradient(160deg, #0f172a 0%, #1e0a0a 100%);
@@ -444,7 +444,7 @@
             margin-bottom: 16px;
         }
         #over-screen p b { color: var(--accent); font-family: var(--font-game); }
- 
+
         /* Shield indicator */
         #shield-hud {
             position: absolute;
@@ -456,7 +456,7 @@
             display: none;
             pointer-events: none;
         }
- 
+
         /* Combo popup */
         #combo-popup {
             position: absolute;
@@ -472,7 +472,7 @@
             pointer-events: none;
             transition: all 0.1s;
         }
- 
+
         /* Sound toggle */
         #sound-toggle {
             position: absolute;
@@ -494,7 +494,7 @@
             pointer-events: auto;
         }
         #sound-toggle:hover { background: rgba(56,189,248,0.15); color: var(--accent); }
- 
+
         /* ── MORTAL KOMBAT PHASE SCREAM ── */
         #mk-overlay {
             position: absolute;
@@ -560,7 +560,7 @@
             from { text-shadow: 0 0 8px #ffaa00, 0 0 16px #ff8800; opacity: 0.85; }
             to   { text-shadow: 0 0 18px #ffd700, 0 0 35px #ffcc00; opacity: 1; }
         }
- 
+
         @media (orientation: portrait) {
             body::after {
                 content: "🔄 Vire o celular para jogar!";
@@ -580,9 +580,9 @@
     </style>
 </head>
 <body>
- 
+
 <div id="game-container">
- 
+
     <!-- HUD -->
     <div id="hud" class="hidden">
         <div class="hud-block">
@@ -598,28 +598,28 @@
             <span id="lives-display">❤️❤️❤️</span>
         </div>
     </div>
- 
-    <div id="phase-banner" class="hidden">FASE 1: CALOURO</div>
- 
+
+    <div id="phase-banner" class="hidden">FASE 1: ENSINO FUNDAMENTAL</div>
+
     <div id="progress-wrap" class="hidden">
         <div id="progress-bar-bg"><div id="progress-bar-fill" style="width:0%"></div></div>
         <span id="progress-label">0 / 500</span>
     </div>
- 
+
     <!-- Shield HUD icon -->
     <canvas id="shield-hud" width="28" height="28"></canvas>
- 
+
     <!-- Combo popup -->
     <div id="combo-popup"></div>
- 
+
     <!-- Sound toggle (visible during game) -->
     <div id="sound-toggle" class="hidden" onclick="toggleSound()" title="Som">🔊</div>
- 
+
     <!-- START SCREEN -->
     <div id="start-screen" class="screen">
         <h1 class="game-title">MATEMÁTICA <span>PRO</span></h1>
         <p class="game-subtitle">Desenvolvido por Prof. ReinaldoNR</p>
- 
+
         <!-- Skin selector -->
         <div class="skin-section">
             <div class="skin-label">Escolha seu personagem</div>
@@ -642,7 +642,7 @@
                 </div>
             </div>
         </div>
- 
+
         <!-- Theme selector -->
         <div class="skin-label" style="margin-bottom:8px;">Cenário</div>
         <div class="theme-grid">
@@ -651,17 +651,17 @@
             <div class="theme-btn" onclick="selectTheme('oceano',this)">🌊 Oceano</div>
             <div class="theme-btn" onclick="selectTheme('vulcao',this)">🌋 Vulcão</div>
         </div>
- 
+
         <span class="ranking-title">🏆 Maiores Pontuações</span>
         <div id="leaderboard">Sincronizando recordes...</div>
         <input type="text" id="input-name" placeholder="Seu nome aqui" maxlength="20">
         <!-- Spacer so content doesn't hide behind pinned button -->
         <div style="height:8px;flex-shrink:0;"></div>
     </div>
- 
+
     <!-- PINNED start button — always visible regardless of scroll -->
     <button id="btn-start-fixed" onclick="startGame()">▶ INICIAR DESAFIO</button>
- 
+
     <!-- MORTAL KOMBAT PHASE SCREAM OVERLAY -->
     <div id="mk-overlay" class="hidden">
         <div id="mk-face-wrap">
@@ -732,14 +732,14 @@
             <div id="mk-sub">PROF. REINALDONR DESBLOQUEOU A FASE!</div>
         </div>
     </div>
- 
+
     <!-- PAUSE SCREEN -->
     <div id="pause-screen" class="screen hidden">
         <h1>PAUSADO</h1>
         <p style="color:rgba(255,255,255,0.5);font-family:var(--font-ui);margin-bottom:20px;">O jogo está aguardando você...</p>
         <button class="btn-main" onclick="togglePause()">▶ RETOMAR</button>
     </div>
- 
+
     <!-- GAME OVER SCREEN -->
     <div id="over-screen" class="screen hidden">
         <h2>CÁLCULO ENCERRADO!</h2>
@@ -749,13 +749,13 @@
             VER RANKING / REPETIR
         </button>
     </div>
- 
+
     <!-- Life-lost red flash overlay -->
     <div id="life-flash"></div>
- 
+
     <canvas id="game" width="820" height="310" tabindex="0"></canvas>
 </div>
- 
+
 <script>
 // ─────────────────────────────────────────────
 //  CONFIG
@@ -764,11 +764,11 @@ const WEB_APP = "https://script.google.com/macros/s/AKfycbxGNEpfmY_k9EoU_LoiuxZm
 const canvas = document.getElementById('game');
 const ctx    = canvas.getContext('2d');
 const W = 820, H = 310;
- 
+
 // ─────────────────────────────────────────────
 //  STATE
 // ─────────────────────────────────────────────
-let running=false, paused=false, score=0, speed=5, frame=0, playerName="";
+let running=false, paused=false, score=0, speed=3.5, frame=0, playerName="";
 let obstacles=[], particles=[], auraParticles=[], ghosts=[];
 let shake=0, parallaxX=W;
 let currentPhaseName="";
@@ -782,21 +782,21 @@ let weatherParticles = [];
 let bgBuildings = [];
 let coins = [];
 let isMobile = /Mobi|Android/i.test(navigator.userAgent);
-const SPEED_MAX = 10;
-const SPEED_INC = 0.002;
+const SPEED_MAX = 8.5;
+const SPEED_INC = 0.0003;
 // Vidas
 let lives = 3;
 const MAX_LIVES = 3;
 let invincible = false;   // invencibilidade temporária após perder vida
 let invincTimer = 0;      // frames de invencibilidade (120 = ~2s)
- 
+
 // Web Audio
 let audioCtx = null;
 function getAudioCtx() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     return audioCtx;
 }
- 
+
 // ─────────────────────────────────────────────
 //  THEMES
 // ─────────────────────────────────────────────
@@ -838,7 +838,7 @@ const THEMES = {
         label: '🌋 Vulcão'
     }
 };
- 
+
 // ─────────────────────────────────────────────
 //  SKINS
 // ─────────────────────────────────────────────
@@ -848,7 +848,7 @@ const SKINS = {
     robo:      { color: '#e2e8f0', outline: '#0f172a', accent: '#38bdf8',  name: 'Robô'      },
     astro:     { color: '#ffffff', outline: '#1e293b', accent: '#818cf8',  name: 'Astronauta'}
 };
- 
+
 // ─────────────────────────────────────────────
 //  SOUND ENGINE (Web Audio API — zero arquivos)
 // ─────────────────────────────────────────────
@@ -858,7 +858,7 @@ function playSound(type) {
         const ac = getAudioCtx();
         const g  = ac.createGain();
         g.connect(ac.destination);
- 
+
         if (type === 'jump') {
             const o = ac.createOscillator();
             o.connect(g);
@@ -935,7 +935,7 @@ function playSound(type) {
         }
     } catch(e) {}
 }
- 
+
 // Background music loop (simple 8-bit style)
 let bgMusicInterval = null;
 let musicNotes = [261,294,330,349,392,440,494,523];
@@ -968,12 +968,12 @@ function stopBgMusic() {
     clearInterval(bgMusicInterval);
     bgMusicInterval = null;
 }
- 
+
 // ─────────────────────────────────────────────
 //  WEATHER / ATMOSPHERE
 // ─────────────────────────────────────────────
 const MAX_WEATHER = isMobile ? 60 : 120;
- 
+
 function initWeather() {
     weatherParticles = [];
     const t = THEMES[selectedTheme];
@@ -982,7 +982,7 @@ function initWeather() {
         weatherParticles.push(createWeatherParticle(t.weatherType, true));
     }
 }
- 
+
 function createWeatherParticle(type, random=false) {
     const p = { type };
     if (type === 'rain') {
@@ -1015,11 +1015,11 @@ function createWeatherParticle(type, random=false) {
     }
     return p;
 }
- 
+
 function updateWeather() {
     const t = THEMES[selectedTheme];
     const type = t.weatherType;
- 
+
     weatherParticles.forEach((p, i) => {
         if (type === 'rain') {
             p.x += p.vx; p.y += p.vy;
@@ -1038,14 +1038,14 @@ function updateWeather() {
             }
         }
     });
- 
+
     // Replenish if needed (max cap for performance)
     const target = isMobile ? 40 : 80;
     if (weatherParticles.length < target && type === 'embers') {
         weatherParticles.push(createWeatherParticle(type));
     }
 }
- 
+
 function drawWeather() {
     const type = THEMES[selectedTheme].weatherType;
     weatherParticles.forEach(p => {
@@ -1082,7 +1082,7 @@ function drawWeather() {
         ctx.restore();
     });
 }
- 
+
 // ─────────────────────────────────────────────
 //  BACKGROUND BUILDINGS (Cidade theme)
 // ─────────────────────────────────────────────
@@ -1098,7 +1098,7 @@ function initBuildings() {
         });
     }
 }
- 
+
 function drawBuildings() {
     bgBuildings.forEach(b => {
         b.x -= b.speed * (speed / 7);
@@ -1114,7 +1114,7 @@ function drawBuildings() {
         }
     });
 }
- 
+
 // ─────────────────────────────────────────────
 //  COINS
 // ─────────────────────────────────────────────
@@ -1126,14 +1126,14 @@ function spawnCoin() {
         frame: Math.random() * Math.PI * 2
     });
 }
- 
+
 function drawCoins() {
     for (let i = coins.length - 1; i >= 0; i--) {
         const c = coins[i];
         c.x -= speed;
         c.frame += 0.1;
         if (c.collected || c.x < -20) { coins.splice(i, 1); continue; }
- 
+
         const bob = Math.sin(c.frame) * 4;
         ctx.save();
         ctx.globalAlpha = 0.9;
@@ -1149,7 +1149,7 @@ function drawCoins() {
         ctx.textAlign = 'center';
         ctx.fillText('$', c.x, c.y + bob + 4);
         ctx.restore();
- 
+
         // Collision with player
         const px = player.x + 15, py = player.y + 30;
         const dx = px - c.x, dy = py - (c.y + bob);
@@ -1161,7 +1161,7 @@ function drawCoins() {
         }
     }
 }
- 
+
 // ─────────────────────────────────────────────
 //  PARTICLES
 // ─────────────────────────────────────────────
@@ -1177,19 +1177,19 @@ function spawnParticles(x, y, color, count=8) {
         });
     }
 }
- 
+
 // ─────────────────────────────────────────────
 //  PLAYER
 // ─────────────────────────────────────────────
 const GROUND_Y = 248;
- 
+
 const player = {
     x: 80,
     y: GROUND_Y,
     vy: 0,
     grav: 0.85,
     isGrounded: true,
- 
+
     jump() {
         if (this.y >= GROUND_Y - 2) {
             this.vy = -16;
@@ -1198,18 +1198,18 @@ const player = {
             playSound('jump');
         }
     },
- 
+
     update() {
         if (paused) return;
         this.y += this.vy;
         this.vy += this.grav;
         if (this.y > GROUND_Y) { this.y = GROUND_Y; this.vy = 0; this.isGrounded = true; }
- 
-        // Ghost trail at high speed
-        if (speed > 9 && frame % 3 === 0) {
+
+        // Ghost trail a partir de speed > 7 (velocidade avançada)
+        if (speed > 7 && frame % 3 === 0) {
             ghosts.push({ x: this.x, y: this.y, alpha: 0.35 });
         }
- 
+
         // Aura at high score
         if (score >= 2500 && frame % 2 === 0) {
             auraParticles.push({
@@ -1219,32 +1219,32 @@ const player = {
                 life: 1
             });
         }
- 
+
         // Shield timer
         if (shieldActive) {
             shieldTimer--;
             if (shieldTimer <= 0) shieldActive = false;
         }
- 
+
         // Slow-mo timer
         if (slowmoActive) {
             slowmoTimer--;
             if (slowmoTimer <= 0) slowmoActive = false;
         }
- 
+
         // Invencibilidade pós-colisão
         if (invincible) {
             invincTimer--;
             if (invincTimer <= 0) { invincible = false; invincTimer = 0; }
         }
     },
- 
+
     draw() {
         const skin = SKINS[selectedSkin];
- 
+
         // Durante invencibilidade: personagem pisca (alterna visibilidade a cada 6 frames)
         if (invincible && frame % 12 < 6) return;
- 
+
         // Ghost trail — reverse loop para evitar index skip no splice
         for (let gi = ghosts.length - 1; gi >= 0; gi--) {
             const g = ghosts[gi];
@@ -1256,7 +1256,7 @@ const player = {
             g.alpha -= 0.06;
             if (g.alpha <= 0) ghosts.splice(gi, 1);
         }
- 
+
         // Aura particles — reverse loop para evitar index skip no splice
         for (let ai = auraParticles.length - 1; ai >= 0; ai--) {
             const p = auraParticles[ai];
@@ -1269,12 +1269,12 @@ const player = {
             p.y += p.vy; p.life -= 0.04;
             if (p.life <= 0) auraParticles.splice(ai, 1);
         }
- 
+
         ctx.save();
         ctx.strokeStyle = skin.color;
         ctx.lineWidth = 4;
         ctx.lineCap = 'round';
- 
+
         // Shield visual
         if (shieldActive) {
             ctx.save();
@@ -1286,7 +1286,7 @@ const player = {
             ctx.stroke();
             ctx.restore();
         }
- 
+
         if (selectedSkin === 'robo') {
             // Robot: boxy, mechanical — white body, dark outline
             ctx.strokeStyle = skin.outline;
@@ -1405,7 +1405,7 @@ const player = {
             ctx.beginPath(); ctx.moveTo(this.x+15,this.y+45); ctx.lineTo(this.x+15-leg,this.y+62); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(this.x+15,this.y+25); ctx.lineTo(this.x+15+armSwing,this.y+38); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(this.x+15,this.y+25); ctx.lineTo(this.x+15-armSwing,this.y+38); ctx.stroke();
- 
+
             // Evolução visual
             if (score >= 500) {
                 ctx.strokeStyle = skin.outline; ctx.lineWidth = 4;
@@ -1449,27 +1449,27 @@ const player = {
         ctx.restore();
     }
 };
- 
+
 // ─────────────────────────────────────────────
 //  PHASES
 // ─────────────────────────────────────────────
 const PHASES = [
-    { min: 0,    name: "Fase 1: Calouro",           next: 500  },
-    { min: 500,  name: "Fase 2: Acadêmica",          next: 1000 },
-    { min: 1000, name: "Fase 3: Especialista",       next: 1500 },
-    { min: 1500, name: "Fase 4: Mestre dos Cálculos",next: 2000 },
-    { min: 2000, name: "Fase 5: Mutação Matemática", next: 2500 },
-    { min: 2500, name: "Fase 6: Newtoniana",         next: 3000 },
-    { min: 3000, name: "Fase 7: Excelência de Ouro", next: null }
+    { min: 0,    name: "Fase 1: Ensino Fundamental", next: 500  },
+    { min: 500,  name: "Fase 2: Ensino Médio",        next: 1000 },
+    { min: 1000, name: "Fase 3: Graduação",            next: 1500 },
+    { min: 1500, name: "Fase 4: Especialista",         next: 2000 },
+    { min: 2000, name: "Fase 5: Mestrado",             next: 2500 },
+    { min: 2500, name: "Fase 6: Doutorado",            next: 3000 },
+    { min: 3000, name: "Fase 7: PHD",                  next: null }
 ];
- 
+
 function getPhase() {
     for (let i = PHASES.length - 1; i >= 0; i--) {
         if (score >= PHASES[i].min) return PHASES[i];
     }
     return PHASES[0];
 }
- 
+
 function updatePhaseHUD() {
     const phase = getPhase();
     const banner = document.getElementById('phase-banner');
@@ -1483,7 +1483,7 @@ function updatePhaseHUD() {
             triggerMKScream(phase.name);
         }
     }
- 
+
     // Progress bar
     const fill  = document.getElementById('progress-bar-fill');
     const label = document.getElementById('progress-label');
@@ -1496,7 +1496,7 @@ function updatePhaseHUD() {
         label.textContent = 'MAX!';
     }
 }
- 
+
 function triggerMKScream(phaseName) {
     const overlay = document.getElementById('mk-overlay');
     document.getElementById('mk-phase-name').textContent = phaseName;
@@ -1513,7 +1513,7 @@ function triggerMKScream(phaseName) {
     // Play scream sound
     playMKScream();
 }
- 
+
 function playMKScream() {
     if (!soundEnabled) return;
     try {
@@ -1549,7 +1549,7 @@ function playMKScream() {
         os.start(ac.currentTime+0.1); os.stop(ac.currentTime+0.75);
     } catch(e) {}
 }
- 
+
 // ─────────────────────────────────────────────
 //  OBSTACLE COLORS
 // ─────────────────────────────────────────────
@@ -1559,7 +1559,7 @@ const OBS_COLORS = {
     oceano: ["#0ea5e9","#06b6d4","#34d399","#67e8f9","#a5f3fc"],
     vulcao: ["#ef4444","#f97316","#fbbf24","#dc2626","#fb923c"]
 };
- 
+
 // ─────────────────────────────────────────────
 //  POWER-UPS spawn
 // ─────────────────────────────────────────────
@@ -1569,23 +1569,23 @@ function maybeSpawnPowerup() {
     if (r < 0.008 && !shieldActive) spawnPowerup('shield');
     if (r > 0.992 && !slowmoActive) spawnPowerup('slowmo');
 }
- 
+
 let powerups = [];
 function spawnPowerup(type) {
     powerups.push({ x: W + 20, y: 120 + Math.random() * 80, type, frame: 0 });
 }
- 
+
 function drawPowerups() {
     for (let i = powerups.length - 1; i >= 0; i--) {
         const p = powerups[i];
         p.x -= speed;
         p.frame += 0.08;
         if (p.x < -30) { powerups.splice(i, 1); continue; }
- 
+
         const bob = Math.sin(p.frame) * 5;
         ctx.save();
         ctx.shadowBlur = 16;
- 
+
         if (p.type === 'shield') {
             ctx.shadowColor = '#38bdf8';
             ctx.strokeStyle = '#38bdf8';
@@ -1618,7 +1618,7 @@ function drawPowerups() {
             ctx.fillText('⏱', p.x + 10, p.y + 5 + bob);
         }
         ctx.restore();
- 
+
         // Collision check
         const px = player.x + 15, py = player.y + 30;
         const dx = px - (p.x + 10), dy = py - (p.y + bob);
@@ -1630,25 +1630,25 @@ function drawPowerups() {
         }
     }
 }
- 
+
 // ─────────────────────────────────────────────
 //  BACKGROUND DRAW
 // ─────────────────────────────────────────────
 function drawBackground() {
     const theme = THEMES[selectedTheme];
- 
+
     // Sky gradient
     const grad = ctx.createLinearGradient(0, 0, 0, H - 60);
     theme.sky.forEach((c, i) => grad.addColorStop(i / (theme.sky.length - 1), c));
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H - 60);
- 
+
     // Weather / atmosphere
     drawWeather();
- 
+
     // City buildings
     if (selectedTheme === 'cidade') drawBuildings();
- 
+
     // Parallax watermark
     ctx.save();
     ctx.fillStyle = 'rgba(255,255,255,0.04)';
@@ -1656,11 +1656,11 @@ function drawBackground() {
     ctx.textAlign = 'center';
     ctx.fillText('PROF. REINALDONR', parallaxX, 70);
     ctx.restore();
- 
+
     // Ground
     ctx.fillStyle = theme.groundFill;
     ctx.fillRect(0, H - 60, W, 60);
- 
+
     // Ground line (glowing)
     ctx.save();
     ctx.shadowBlur = 8;
@@ -1672,7 +1672,7 @@ function drawBackground() {
     ctx.lineTo(W, H - 60);
     ctx.stroke();
     ctx.restore();
- 
+
     // Bottom credit
     ctx.save();
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
@@ -1682,13 +1682,13 @@ function drawBackground() {
     ctx.restore();
     ctx.textAlign = 'left';
 }
- 
+
 // ─────────────────────────────────────────────
 //  OBSTACLES
 // ─────────────────────────────────────────────
 const OBS_TYPES = ['sq', 'circ', 'rect', 'tri'];
 let obstacleTimer = 0;
- 
+
 function spawnObstacle() {
     const colors = OBS_COLORS[selectedTheme];
     obstacles.push({
@@ -1697,15 +1697,15 @@ function spawnObstacle() {
         color: colors[Math.floor(Math.random() * colors.length)]
     });
 }
- 
+
 function drawObstacles() {
     const theme = THEMES[selectedTheme];
     const curSpeed = (slowmoActive ? speed * 0.4 : speed) + 1;
- 
+
     for (let i = obstacles.length - 1; i >= 0; i--) {
         const o = obstacles[i];
         o.x -= curSpeed;
- 
+
         ctx.save();
         if (theme.obstacleGlow) {
             ctx.shadowBlur = 15;
@@ -1713,7 +1713,7 @@ function drawObstacles() {
         }
         ctx.fillStyle = o.color;
         ctx.beginPath();
- 
+
         const gY = H - 60;
         if (o.type === 'circ')  ctx.arc(o.x + 28, gY - 28, 28, 0, Math.PI * 2);
         else if (o.type === 'sq')   ctx.rect(o.x, gY - 60, 58, 60);
@@ -1724,14 +1724,14 @@ function drawObstacles() {
         ctx.lineWidth = 1;
         ctx.stroke();
         ctx.restore();
- 
+
         // Hitbox — tighter than visual for fair play
         const hitW = o.type === 'rect' ? 76 : o.type === 'tri' ? 60 : 54;
         const hitH = o.type === 'sq' ? 58 : o.type === 'rect' ? 38 : o.type === 'circ' ? 54 : 62;
         const px = player.x, py = player.y;
         const gnd = H - 60;
         const colliding = (px + 26 > o.x + 4) && (px + 4 < o.x + hitW) && (py + 55 > gnd - hitH + 4);
- 
+
         if (colliding) {
             if (shieldActive) {
                 shieldActive = false; shieldTimer = 0; shake = 8;
@@ -1744,7 +1744,7 @@ function drawObstacles() {
             loseLife(i, gnd);
             continue; // obstáculo já removido em loseLife — não testar o.x < -120
         }
- 
+
         if (o.x < -120) {
             obstacles.splice(i, 1);
             combo++;
@@ -1759,14 +1759,14 @@ function drawObstacles() {
         }
     }
 }
- 
+
 function showComboPopup() {
     const el = document.getElementById('combo-popup');
     el.textContent = `x${comboMultiplier} COMBO!`;
     el.style.transform = 'translate(-50%, -50%) scale(1.2)';
     setTimeout(() => { el.style.transform = 'translate(-50%, -50%) scale(0)'; }, 800);
 }
- 
+
 // ─────────────────────────────────────────────
 //  LIVES SYSTEM
 // ─────────────────────────────────────────────
@@ -1779,21 +1779,21 @@ function updateLivesHUD() {
     }
     document.getElementById('lives-display').textContent = display;
 }
- 
+
 function loseLife(obsIndex, gnd) {
     lives--;
     updateLivesHUD();
     shake = 30;
     playSound('die');
- 
+
     // Remover o obstáculo que causou a colisão
     obstacles.splice(obsIndex, 1);
- 
+
     // Reset de combo ao perder vida
     combo = 0;
     comboMultiplier = 1;
     document.getElementById('combo-display').classList.add('hidden');
- 
+
     if (lives <= 0) {
         // Game over — garantir que o canvas não fique com transform de shake
         ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -1807,20 +1807,20 @@ function loseLife(obsIndex, gnd) {
         }).catch(() => {});
         return;
     }
- 
+
     // Ainda tem vidas — período de graça de 120 frames (~2s)
     invincible = true;
     invincTimer = 120;
- 
+
     // Partículas vermelhas de impacto
     spawnParticles(player.x + 15, player.y + 30, '#f43f5e', 14);
- 
+
     // Flash vermelho na tela
     const flashEl = document.getElementById('life-flash');
     flashEl.classList.add('active');
     setTimeout(() => flashEl.classList.remove('active'), 300);
 }
- 
+
 // ─────────────────────────────────────────────
 //  PARTICLES DRAW
 // ─────────────────────────────────────────────
@@ -1838,7 +1838,7 @@ function drawParticles() {
         if (p.life <= 0) particles.splice(i, 1);
     }
 }
- 
+
 // ─────────────────────────────────────────────
 //  SHIELD HUD
 // ─────────────────────────────────────────────
@@ -1862,7 +1862,7 @@ function drawShieldHUD() {
         shieldCanvas.style.display = 'none';
     }
 }
- 
+
 // ─────────────────────────────────────────────
 //  SLOW MO TINT
 // ─────────────────────────────────────────────
@@ -1873,7 +1873,7 @@ function drawSlowmoTint() {
     ctx.fillRect(0, 0, W, H);
     ctx.restore();
 }
- 
+
 // ─────────────────────────────────────────────
 //  MAIN LOOP
 // ─────────────────────────────────────────────
@@ -1888,18 +1888,18 @@ function loop() {
         } else {
             ctx.setTransform(1, 0, 0, 1, 0, 0);
         }
- 
+
         ctx.clearRect(0, 0, W, H);
- 
+
         // Background
         parallaxX -= speed * 0.3;
         if (parallaxX < -W) parallaxX = W;
         drawBackground();
         updateWeather();
- 
+
         // Slow-mo tint
         drawSlowmoTint();
- 
+
         // Game objects
         drawCoins();
         drawPowerups();
@@ -1907,33 +1907,33 @@ function loop() {
         player.draw();
         drawObstacles();
         drawParticles();
- 
+
         // HUD updates
         updatePhaseHUD();
         drawShieldHUD();
- 
+
         document.getElementById('p-score').innerText = score;
- 
-        // Spawn logic — base 120 frames, reduz suavemente com score
+
+        // Spawn logic — base 150 frames (~2,5s a 60fps), diminui gradualmente com score
         obstacleTimer++;
-        const spawnRate = Math.max(70, 120 - Math.floor(score / 150));
+        const spawnRate = Math.max(95, 150 - Math.floor(score / 230));
         if (obstacleTimer >= spawnRate) {
             spawnObstacle();
             obstacleTimer = 0;
         }
- 
+
         // Coin spawn occasionally
         if (frame % 200 === 0 && Math.random() > 0.4) spawnCoin();
- 
+
         // Power-up check every frame
         maybeSpawnPowerup();
- 
+
         frame++;
         if (speed < SPEED_MAX) speed += SPEED_INC;
     }
     requestAnimationFrame(loop);
 }
- 
+
 // ─────────────────────────────────────────────
 //  INIT
 // ─────────────────────────────────────────────
@@ -1956,7 +1956,7 @@ window.onload = function() {
     initWeather();
     if (selectedTheme === 'cidade') initBuildings();
 };
- 
+
 async function loadLeaderboard() {
     try {
         const res = await fetch(WEB_APP);
@@ -1972,7 +1972,7 @@ async function loadLeaderboard() {
         document.getElementById('leaderboard').innerText = 'Aguardando recordes...';
     }
 }
- 
+
 function selectSkin(skin, btn) {
     selectedSkin = skin;
     document.querySelectorAll('.skin-btn').forEach(b => b.classList.remove('active'));
@@ -1980,7 +1980,7 @@ function selectSkin(skin, btn) {
     localStorage.setItem('skin', skin);
 }
 window.selectSkin = selectSkin;
- 
+
 function selectTheme(theme, btn) {
     selectedTheme = theme;
     document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
@@ -1990,17 +1990,17 @@ function selectTheme(theme, btn) {
     if (theme === 'cidade') initBuildings(); else bgBuildings = [];
 }
 window.selectTheme = selectTheme;
- 
+
 function startGame() {
     playerName = document.getElementById('input-name').value.trim();
     if (!playerName) return alert('Por favor, digite seu nome!');
     localStorage.setItem('aluno_nome', playerName);
- 
+
     // Reset estado
     lives = MAX_LIVES;
     invincible = false;
     invincTimer = 0;
- 
+
     document.getElementById('p-name').innerText = playerName;
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById('btn-start-fixed').classList.add('hidden');
@@ -2009,16 +2009,16 @@ function startGame() {
     document.getElementById('progress-wrap').classList.remove('hidden');
     document.getElementById('sound-toggle').classList.remove('hidden');
     updateLivesHUD();
- 
+
     initWeather();
     if (selectedTheme === 'cidade') initBuildings();
- 
+
     running = true;
     canvas.focus();
     startBgMusic();
     loop();
 }
- 
+
 function togglePause() {
     if (!running) return;
     paused = !paused;
@@ -2026,14 +2026,14 @@ function togglePause() {
     document.getElementById('btn-pause').innerText = paused ? '▶' : '⏸';
     if (paused) stopBgMusic(); else startBgMusic();
 }
- 
+
 function toggleSound() {
     soundEnabled = !soundEnabled;
     document.getElementById('sound-toggle').innerText = soundEnabled ? '🔊' : '🔇';
     if (!soundEnabled) stopBgMusic();
     else if (running && !paused) startBgMusic();
 }
- 
+
 // ─────────────────────────────────────────────
 //  CONTROLS
 // ─────────────────────────────────────────────
@@ -2041,16 +2041,16 @@ function handleAction(e) {
     if (e) e.preventDefault();
     if (running && !paused) player.jump();
 }
- 
+
 window.onkeydown = (e) => {
     if (['Space','ArrowUp','KeyW'].includes(e.code)) handleAction(e);
     if (e.code === 'KeyP') togglePause();
     if (e.code === 'KeyM') toggleSound();
 };
- 
+
 canvas.addEventListener('touchstart', handleAction, { passive: false });
 canvas.addEventListener('mousedown', handleAction);
- 
+
 // ─────────────────────────────────────────────
 //  UTILS
 // ─────────────────────────────────────────────
@@ -2060,7 +2060,7 @@ function hexToRgb(hex) {
     const b = parseInt(hex.slice(5,7),16);
     return `${r},${g},${b}`;
 }
- 
+
 // Expõe funções globais chamadas via onclick no HTML
 window.startGame      = startGame;
 window.togglePause    = togglePause;
