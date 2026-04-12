@@ -1883,9 +1883,21 @@ function loseLife(obsIndex, gnd) {
         document.getElementById('over-screen').classList.remove('hidden');
         document.getElementById('f-score').innerText = score;
         document.getElementById('over-phase').innerText = currentPhaseName;
-        fetch(WEB_APP, { method:'POST', mode:'no-cors',
-            body: JSON.stringify({ aluno: playerName, pontuacao: score })
-        }).catch(() => {});
+        // Envia pontuação — usa no-cors pois Apps Script não envia CORS headers no POST
+        const payload = JSON.stringify({ aluno: playerName, pontuacao: score });
+        fetch(WEB_APP, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' }, // text/plain evita preflight OPTIONS
+            body: payload
+        }).catch(() => {
+            // Tenta uma segunda vez após 3s se falhar (Apps Script pode estar "a frio")
+            setTimeout(() => {
+                fetch(WEB_APP, { method:'POST', mode:'no-cors',
+                    headers: { 'Content-Type': 'text/plain' }, body: payload
+                }).catch(() => {});
+            }, 3000);
+        });
         return;
     }
 
@@ -2039,18 +2051,31 @@ window.onload = function() {
 };
 
 async function loadLeaderboard() {
+    const div = document.getElementById('leaderboard');
+    div.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:12px;">Carregando...</div>';
     try {
-        const res = await fetch(WEB_APP);
+        // Adiciona cache-buster para evitar resposta em cache do browser
+        const url = WEB_APP + '?v=' + Date.now();
+        const res = await fetch(url, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
         const top3 = await res.json();
-        const div = document.getElementById('leaderboard');
         div.innerHTML = '';
+        if (!top3 || top3.length === 0) {
+            div.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:12px;">Seja o primeiro a jogar!</div>';
+            return;
+        }
         ['🥇','🥈','🥉'].forEach((m, i) => {
             if (top3[i]) {
                 div.innerHTML += `<div class="rank-item"><span>${m} ${top3[i].nome}</span><span style="color:var(--gold)">${top3[i].pontos} pts</span></div>`;
             }
         });
     } catch(e) {
-        document.getElementById('leaderboard').innerText = 'Aguardando recordes...';
+        div.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:11px;">Aguardando recordes...</div>';
+        // Tenta novamente em 5 segundos (útil quando o Apps Script demora a "acordar")
+        setTimeout(loadLeaderboard, 5000);
     }
 }
 
