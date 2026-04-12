@@ -760,10 +760,49 @@
 // ─────────────────────────────────────────────
 //  CONFIG
 // ─────────────────────────────────────────────
+//  SISTEMA DE RANKING - CORRIGIDO
+// ─────────────────────────────────────────────
 const WEB_APP = "https://script.google.com/macros/s/AKfycbxQgWC2B-8HFHkredP2v2-iuIJPJdYgfHaN6g2dFxFcF3oTLCvUeWlqrfEO1C8q-V2i/exec";
-const canvas = document.getElementById('game');
-const ctx    = canvas.getContext('2d');
-const W = 820, H = 310;
+
+async function loadLeaderboard() {
+    const list = document.getElementById('leaderboard-list');
+    try {
+        const response = await fetch(WEB_APP);
+        const data = await response.json();
+        
+        if (!data || data.length === 0) {
+            list.innerHTML = '<li>Aguardando campeões...</li>';
+            return;
+        }
+
+        list.innerHTML = data.map((item, index) => `
+            <li>
+                <span>${index + 1}. ${item.nome}</span>
+                <span>${item.pontos} pts (${item.fase || '---'})</span>
+            </li>
+        `).join('');
+    } catch (err) {
+        console.error("Erro ao carregar ranking:", err);
+        list.innerHTML = '<li>Ranking indisponível</li>';
+    }
+}
+
+function saveScore(name, score) {
+    // Pega a fase real do jogo (estamos usando a variável score ou nivel se existir)
+    const faseAlcancada = (typeof currentLevel !== 'undefined') ? currentLevel : "PHD";
+
+    fetch(WEB_APP, {
+        method: "POST",
+        mode: "no-cors", // Necessário para evitar erro de redirecionamento do Google
+        body: JSON.stringify({
+            aluno: name,
+            pontuacao: score,
+            fase: faseAlcancada
+        })
+    }).then(() => {
+        setTimeout(loadLeaderboard, 1000); // Recarrega o ranking após 1 segundo
+    });
+}
 
 // ─────────────────────────────────────────────
 //  STATE
