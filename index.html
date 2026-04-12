@@ -786,9 +786,14 @@ const SPEED_MAX = 8.5;
 const SPEED_INC = 0.0003;
 // Vidas
 let lives = 3;
-const MAX_LIVES = 3;
+const MAX_LIVES = 5;      // máximo de vidas que o jogador pode acumular
 let invincible = false;   // invencibilidade temporária após perder vida
 let invincTimer = 0;      // frames de invencibilidade (120 = ~2s)
+// Duplo salto
+let jumpCount = 0;        // 0 = no chão, 1 = primeiro salto, 2 = segundo salto usado
+const MAX_JUMPS = 2;
+// Controle de spawn de vida extra (1 por faixa de 500 pts)
+let lastExtraLifeScore = 0;
 
 // Web Audio
 let audioCtx = null;
@@ -932,6 +937,31 @@ function playSound(type) {
             g.gain.setValueAtTime(0.08, ac.currentTime);
             g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.05);
             o.start(); o.stop(ac.currentTime + 0.05);
+        }
+        else if (type === 'doubleJump') {
+            // Som mais agudo que o salto normal — indica segundo pulo
+            const o = ac.createOscillator();
+            o.connect(g);
+            o.type = 'sine';
+            o.frequency.setValueAtTime(700, ac.currentTime);
+            o.frequency.exponentialRampToValueAtTime(1100, ac.currentTime + 0.12);
+            g.gain.setValueAtTime(0.2, ac.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.18);
+            o.start(); o.stop(ac.currentTime + 0.18);
+        }
+        else if (type === 'extraLife') {
+            // Fanfarra alegre de vida extra — 3 notas ascendentes
+            [523, 784, 1047].forEach((freq, i) => {
+                const o = ac.createOscillator();
+                const gi = ac.createGain();
+                o.connect(gi); gi.connect(ac.destination);
+                o.type = 'sine';
+                o.frequency.value = freq;
+                const t = ac.currentTime + i * 0.12;
+                gi.gain.setValueAtTime(0.22, t);
+                gi.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+                o.start(t); o.stop(t + 0.15);
+            });
         }
     } catch(e) {}
 }
@@ -1187,15 +1217,26 @@ const player = {
     x: 80,
     y: GROUND_Y,
     vy: 0,
-    grav: 0.85,
+    grav: 0.78,
     isGrounded: true,
 
     jump() {
+        // Primeiro salto: apenas do chão
         if (this.y >= GROUND_Y - 2) {
-            this.vy = -16;
+            this.vy = -18;
             this.isGrounded = false;
+            jumpCount = 1;
             spawnParticles(this.x + 15, GROUND_Y + 55, SKINS[selectedSkin].accent, 6);
             playSound('jump');
+            return;
+        }
+        // Duplo salto: no ar, apenas uma vez por pulo
+        if (jumpCount < MAX_JUMPS) {
+            jumpCount = MAX_JUMPS;
+            this.vy = -14;  // segundo salto mais fraco que o primeiro
+            // Partículas em torno do personagem no ar
+            spawnParticles(this.x + 15, this.y + 30, '#fbbf24', 8);
+            playSound('doubleJump');
         }
     },
 
@@ -1203,7 +1244,12 @@ const player = {
         if (paused) return;
         this.y += this.vy;
         this.vy += this.grav;
-        if (this.y > GROUND_Y) { this.y = GROUND_Y; this.vy = 0; this.isGrounded = true; }
+        if (this.y > GROUND_Y) {
+            this.y = GROUND_Y;
+            this.vy = 0;
+            this.isGrounded = true;
+            jumpCount = 0; // reset ao tocar o chão
+        }
 
         // Ghost trail a partir de speed > 7 (velocidade avançada)
         if (speed > 7 && frame % 3 === 0) {
@@ -1568,6 +1614,14 @@ function maybeSpawnPowerup() {
     const r = Math.random();
     if (r < 0.008 && !shieldActive) spawnPowerup('shield');
     if (r > 0.992 && !slowmoActive) spawnPowerup('slowmo');
+
+    // Vida extra: 1 por faixa de 500 pts (250, 750, 1250, 1750, 2250, 2750)
+    // Só aparece se perder pelo menos 1 vida e não estiver no máximo
+    const band = Math.floor((score + 250) / 500) * 500; // faixa: 250→500, 750→1000...
+    if (band > lastExtraLifeScore && lives < MAX_LIVES && r > 0.994) {
+        lastExtraLifeScore = band;
+        spawnPowerup('extraLife');
+    }
 }
 
 let powerups = [];
@@ -1616,8 +1670,29 @@ function drawPowerups() {
             ctx.font = 'bold 14px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('⏱', p.x + 10, p.y + 5 + bob);
+        } else if (p.type === 'extraLife') {
+            ctx.shadowColor = '#f43f5e';
+            ctx.strokeStyle = '#f43f5e';
+            ctx.lineWidth = 2;
+            ctx.fillStyle = 'rgba(244,63,94,0.15)';
+            ctx.beginPath();
+            ctx.arc(p.x + 10, p.y + bob, 14, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+            // Coração desenhado em canvas (sem emoji para melhor performance)
+            ctx.fillStyle = '#f43f5e';
+            ctx.save();
+            ctx.translate(p.x + 10, p.y + bob - 1);
+            ctx.scale(0.9, 0.9);
+            ctx.beginPath();
+            ctx.moveTo(0, 2);
+            ctx.bezierCurveTo(0, -2, -6, -6, -8, -2);
+            ctx.bezierCurveTo(-10, 2, -6, 6, 0, 10);
+            ctx.bezierCurveTo(6, 6, 10, 2, 8, -2);
+            ctx.bezierCurveTo(6, -6, 0, -2, 0, 2);
+            ctx.fill();
+            ctx.restore();
         }
-        ctx.restore();
+        ctx.restore(); // restore do ctx.save() principal do loop
 
         // Collision check
         const px = player.x + 15, py = player.y + 30;
@@ -1625,7 +1700,13 @@ function drawPowerups() {
         if (Math.sqrt(dx*dx + dy*dy) < 24) {
             if (p.type === 'shield') { shieldActive = true; shieldTimer = 360; playSound('shield'); }
             if (p.type === 'slowmo') { slowmoActive = true; slowmoTimer = 180; playSound('shield'); }
-            spawnParticles(p.x, p.y, p.type === 'shield' ? '#38bdf8' : '#a78bfa', 10);
+            if (p.type === 'extraLife') {
+                if (lives < MAX_LIVES) { lives++; updateLivesHUD(); playSound('extraLife'); }
+                spawnParticles(p.x, p.y, '#f43f5e', 14);
+                spawnParticles(p.x, p.y, '#fbbf24', 8);
+            } else {
+                spawnParticles(p.x, p.y, p.type === 'shield' ? '#38bdf8' : '#a78bfa', 10);
+            }
             powerups.splice(i, 1);
         }
     }
@@ -2000,6 +2081,8 @@ function startGame() {
     lives = MAX_LIVES;
     invincible = false;
     invincTimer = 0;
+    jumpCount = 0;
+    lastExtraLifeScore = 0;
 
     document.getElementById('p-name').innerText = playerName;
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
